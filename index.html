@@ -27,7 +27,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;p
 <p>10 sadə IT sualını cavablandır. Sonda düzgün və səhv cavablarının sayını, balını gör.</p>
 <label for="participant">Adın</label><input id="participant" maxlength="50" placeholder="Adını yaz" autocomplete="name">
 <div class="pills"><span class="pill">10 sual</span><span class="pill">3–5 dəqiqə</span><span class="pill">100 bal</span></div>
-<button class="primary" onclick="startTest()">TESTƏ BAŞLA →</button><a class="adminlink" href="#admin">Admin paneli</a>
+<button class="primary" id="startBtn">TESTƏ BAŞLA →</button><a class="adminlink" href="#admin">Admin paneli</a>
 </section>
 
 <section class="card hidden" id="quiz">
@@ -101,6 +101,11 @@ function startTest(){
   page("quiz");
   draw();
 }
+
+// Düyməni birbaşa JS ilə bağlayırıq (onclick xətası verməsin deyə)
+window.addEventListener('DOMContentLoaded', () => {
+  $("startBtn").addEventListener('click', startTest);
+});
 
 function draw(){
   locked=false;
