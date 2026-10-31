@@ -21,25 +21,45 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;p
 </style></head>
 <body><main>
 <header><div class="brand">Cyber<span>X</span> AZ</div><div class="tag">IT KNOWLEDGE TEST</div></header>
+
 <section class="card" id="start">
 <div class="topic">Özünü yoxlamağın vaxtıdır</div><h1>IT biliklərin<br>nə yerdədir?</h1>
 <p>10 sadə IT sualını cavablandır. Sonda düzgün və səhv cavablarının sayını, balını gör.</p>
 <label for="participant">Adın</label><input id="participant" maxlength="50" placeholder="Adını yaz" autocomplete="name">
 <div class="pills"><span class="pill">10 sual</span><span class="pill">3–5 dəqiqə</span><span class="pill">100 bal</span></div>
-<button class="primary" id="startBtn">TESTƏ BAŞLA →</button><a class="adminlink" href="#admin">Admin paneli</a>
+<button class="primary" onclick="startTest()">TESTƏ BAŞLA →</button><a class="adminlink" href="#admin">Admin paneli</a>
 </section>
+
 <section class="card hidden" id="quiz">
 <div class="row"><span id="count"></span><span id="pct"></span></div><div class="progress"><div class="fill" id="fill"></div></div>
 <div class="topic" id="topic"></div><h2 class="question" id="question"></h2><div class="answers" id="answers"></div>
 <div id="feedback" class="hidden"></div><button class="primary hidden" id="next" style="margin-top:17px">NÖVBƏTİ →</button>
 </section>
+
 <section class="card hidden" id="result"><div class="topic">Test tamamlandı</div><h1 id="resultTitle">Nəticən</h1><p id="resultText"></p>
 <div class="stats"><div class="stat"><strong id="right" style="color:#4ade80"></strong><span class="muted">Düzgün cavab</span></div><div class="stat"><strong id="wrong" style="color:#f87171"></strong><span class="muted">Səhv cavab</span></div></div>
 <button class="primary" onclick="location.hash=''; location.reload();">YENİDƏN CƏHD ET</button></section>
+
 <section class="card hidden" id="admin"><h1>Admin paneli</h1><p>Yalnız idarəçi hesabı ilə giriş et.</p>
 <div id="loginForm">
 <input id="email" placeholder="Admin e-poçtu" type="email"><input id="password" placeholder="Şifrə" type="password">
 <button class="primary" id="login">DAXİL OL</button>
 </div>
 <p id="adminMsg" class="muted"></p>
-<div id="dashboard" class="hidden"><div class="stats"><div class="stat"><strong id="total">0</strong><span class="muted">İştirakçı</span></div><div class="stat"><strong id="average">0</strong><span class="muted">Orta bal</span></div>
+<div id="dashboard" class="hidden"><div class="stats"><div class="stat"><strong id="total">0</strong><span class="muted">İştirakçı</span></div><div class="stat"><strong id="average">0</strong><span class="muted">Orta bal</span></div></div>
+<div class="scroll"><table><thead><tr><th>Ad</th><th>Düzgün</th><th>Səhv</th><th>Bal</th><th>Tarix</th></tr></thead><tbody id="rows"></tbody></table></div>
+<button class="primary" id="logout" style="margin-top:16px">ÇIXIŞ</button></div>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://chkatxaiuaaynhdkzvsd.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_4Z4mDmXQ8j5VkoN8nfvotg_SQXwqQsj";
+const configured = SUPABASE_URL.startsWith("https://") && !SUPABASE_ANON_KEY.includes("BURAYA");
+const db = configured ? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY) : null;
+const questions=[
+{t:"Şəbəkə əsasları",q:"Router-in əsas funksiyası nədir?",a:["Kompüteri soyutmaq","Müxtəlif şəbəkələr arasında məlumat ötürmək","Faylları sıxmaq","Ekranın görüntüsünü artırmaq"],c:1,e:"Router müxtəlif IP şəbəkələri arasında paketləri yönləndirir."},
+{t:"IP ünvanları",q:"Aşağıdakılardan hansı private IPv4 ünvanıdır?",a:["8.8.8.8","1.1.1.1","192.168.1.10","45.12.3.4"],c:2,e:"192.168.0.0–192.168.255.255 private IP diapazonudur."},
+{t:"Protokollar",q:"HTTP üçün standart port hansıdır?",a:["21","25","80","443"],c:2,e:"HTTP standart olaraq TCP 80 portundan istifadə edir."},
+{t:"DNS",q:"DNS nə iş görür?",a:["Domen adını IP-yə çevirir","Virusları silir","Wi-Fi gücləndirir","Faylı sıxır"],c:0,e:"DNS domen adının uyğun IP ünvanını tapır."},
+{t:"TCP / UDP",q:"Hansı protokol çatdırılmaya nəzarət və yenidən ötürmə
