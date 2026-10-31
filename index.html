@@ -35,10 +35,13 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;p
 </section>
 <section class="card hidden" id="result"><div class="topic">Test tamamlandı</div><h1 id="resultTitle">Nəticən</h1><p id="resultText"></p>
 <div class="stats"><div class="stat"><strong id="right" style="color:#4ade80"></strong><span class="muted">Düzgün cavab</span></div><div class="stat"><strong id="wrong" style="color:#f87171"></strong><span class="muted">Səhv cavab</span></div></div>
-<button class="primary" onclick="location.reload()">YENİDƏN CƏHD ET</button></section>
+<button class="primary" onclick="location.hash=''; location.reload();">YENİDƏN CƏHD ET</button></section>
 <section class="card hidden" id="admin"><h1>Admin paneli</h1><p>Yalnız idarəçi hesabı ilə giriş et.</p>
+<div id="loginForm">
 <input id="email" placeholder="Admin e-poçtu" type="email"><input id="password" placeholder="Şifrə" type="password">
-<button class="primary" id="login">DAXİL OL</button><p id="adminMsg" class="muted"></p>
+<button class="primary" id="login">DAXİL OL</button>
+</div>
+<p id="adminMsg" class="muted"></p>
 <div id="dashboard" class="hidden"><div class="stats"><div class="stat"><strong id="total">0</strong><span class="muted">İştirakçı</span></div><div class="stat"><strong id="average">0</strong><span class="muted">Orta bal</span></div></div>
 <div class="scroll"><table><thead><tr><th>Ad</th><th>Düzgün</th><th>Səhv</th><th>Bal</th><th>Tarix</th></tr></thead><tbody id="rows"></tbody></table></div>
 <button class="primary" id="logout" style="margin-top:16px">ÇIXIŞ</button></div>
@@ -46,7 +49,6 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;p
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* QURAŞDIRMA: aşağıdakı iki dəyəri Supabase layihəndən götür və doldur. */
 const SUPABASE_URL = "https://chkatxaiuaaynhdkzvsd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_4Z4mDmXQ8j5VkoN8nfvotg_SQXwqQsj";
 const configured = SUPABASE_URL.startsWith("https://") && !SUPABASE_ANON_KEY.includes("BURAYA");
@@ -65,15 +67,26 @@ const questions=[
 ];
 let idx=0,good=0,bad=0,name="",locked=false;
 const $=id=>document.getElementById(id);
+
 function page(id){["start","quiz","result","admin"].forEach(x=>$(x).classList.toggle("hidden",x!==id))}
+
+function handleRoute(){
+  if(location.hash==="#admin"){
+    page("admin");
+    if(db){
+      db.auth.getUser().then(({data:{user}})=>{
+        if(user) loadAdmin();
+      });
+    }
+  } else {
+    page("start");
+  }
+}
+
+window.addEventListener('hashchange', handleRoute);
+window.addEventListener('load', handleRoute);
+
 function start(){name=$("participant").value.trim();if(!name){alert("Zəhmət olmasa adını yaz.");return}idx=0;good=0;bad=0;page("quiz");draw()}
-function draw(){locked=false;let q=questions[idx];$("count").textContent=`Sual ${idx+1} / 10`;$("pct").textContent=`${(idx+1)*10}%`;$("fill").style.width=`${(idx+1)*10}%`;$("topic").textContent=q.t;$("question").textContent=q.q;$("feedback").className="hidden";$("next").classList.add("hidden");$("answers").innerHTML="";
+function draw(){locked=false;let q=questions[idx];$("count").textContent=`Sual ${idx+1} / 10`;$("pct").textContent=`${(idx+1)*10}%`;$("fill").style.width=`${(idx+1)*10}\%`;$("topic").textContent=q.t;$("question").textContent=q.q;$("feedback").className="hidden";$("next").classList.add("hidden");$("answers").innerHTML="";
 q.a.forEach((a,i)=>{let b=document.createElement("button");b.className="answer";let l=document.createElement("span");l.className="letter";l.textContent="ABCD"[i];let s=document.createElement("span");s.textContent=a;b.append(l,s);b.onclick=()=>choose(i,b);$("answers").append(b)})}
-function choose(n,btn){if(locked)return;locked=true;let q=questions[idx],bs=[...$("answers").children];bs.forEach((b,i)=>{b.disabled=true;if(i===q.c)b.classList.add("correct")});let f=$("feedback");if(n===q.c){good++;f.textContent="✓ Düzgün! "+q.e;f.className="feedback"}else{bad++;btn.classList.add("wrong");f.textContent="✕ Səhv. Düzgün cavab: "+q.a[q.c]+". "+q.e;f.className="feedback bad"}$("next").textContent=idx===9?"NƏTİCƏYƏ BAX":"NÖVBƏTİ SUAL";$("next").classList.remove("hidden")}
-async function finish(){page("result");let score=good*10;$("right").textContent=good;$("wrong").textContent=bad;$("resultTitle").textContent=score>=90?"Möhtəşəm nəticə!":score>=70?"Çox yaxşı!":score>=40?"Yaxşı başlanğıcdır!":"Davam et, bacaracaqsan!";$("resultText").textContent=`${name}, ${score}/100 bal topladın.`;if(db){const {error}=await db.from("quiz_results").insert({participant_name:name,correct_answers:good,wrong_answers:bad,score});if(error)console.error("Nəticə yadda saxlanmadı:",error.message)}}
-$("startBtn").onclick=start;$("next").onclick=()=>{if(idx<9){idx++;draw()}else finish()};
-$("login").onclick=async()=>{if(!db){$("adminMsg").textContent="Əvvəlcə README faylındakı Supabase quraşdırmasını tamamla.";return}let {error}=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});if(error){$("adminMsg").textContent="Giriş alınmadı: "+error.message;return}loadAdmin()};
-async function loadAdmin(){let {data:{user}}=await db.auth.getUser();if(!user)return;let {data,error}=await db.from("quiz_results").select("*").order("created_at",{ascending:false});if(error){$("adminMsg").textContent=error.message;return}$("dashboard").classList.remove("hidden");$("total").textContent=data.length;$("average").textContent=data.length?Math.round(data.reduce((s,x)=>s+x.score,0)/data.length):0;$("rows").innerHTML="";data.forEach(x=>{let tr=document.createElement("tr");[x.participant_name,x.correct_answers,x.wrong_answers,x.score,new Date(x.created_at).toLocaleString("az-AZ")].forEach(v=>{let td=document.createElement("td");td.textContent=v;tr.append(td)});$("rows").append(tr)})}
-$("logout").onclick=async()=>{await db.auth.signOut();$("dashboard").classList.add("hidden");$("adminMsg").textContent="Hesabdan çıxış edildi."};
-if(location.hash==="#admin")page("admin");
-</script></body></html>
+function choose(n,btn){if(locked)return;locked=true;let q=questions[idx],bs=[...$("answers").children];bs.forEach((b,i)=>{b.disabled=true;if(i===q.c)b.classList.add
