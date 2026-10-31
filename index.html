@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080e1b"><title>CyberX AZ | IT Bilik Testi</title>
+<style>
+:root{--bg:#080e1b;--panel:#111c30;--line:#2a3b56;--muted:#9eacc2;--red:#ef4444;--blue:#38bdf8}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 10% 0%,#172d50,transparent 35%),var(--bg);color:#f4f7fb;font-family:Arial,sans-serif;padding:22px 14px}
+main{max-width:760px;margin:auto}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.brand{font-size:25px;font-weight:900}.brand span{color:var(--red)}.tag{font-size:11px;color:#fecaca;border:1px solid #7f1d1d;padding:7px 10px;border-radius:30px}
+.card{background:#111c30;border:1px solid var(--line);border-radius:20px;padding:clamp(19px,5vw,32px);box-shadow:0 20px 60px #0007}
+h1{font-size:clamp(29px,6vw,42px);margin:0 0 12px;line-height:1.1}p{color:var(--muted);line-height:1.6}.muted{color:var(--muted);font-size:13px}
+input{width:100%;padding:14px;border:1px solid #40536f;border-radius:11px;background:#0c1729;color:white;font-size:16px;margin:8px 0 17px}
+button{cursor:pointer;font:inherit}.primary{width:100%;padding:15px;border:0;border-radius:12px;background:linear-gradient(90deg,#ef4444,#dc2626);color:white;font-weight:800}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.pill{padding:8px 11px;background:#1b2a42;border-radius:30px;font-size:13px;color:#dbeafe}
+.hidden{display:none!important}.progress{height:8px;background:#26364f;border-radius:10px;overflow:hidden;margin:12px 0 25px}.fill{height:100%;background:#38bdf8;width:0}
+.row{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}.topic{color:#7dd3fc;font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.question{font-size:25px;line-height:1.3}.answers{display:grid;gap:10px}.answer{display:flex;gap:12px;align-items:center;text-align:left;padding:14px;background:#17263d;color:white;border:1px solid #354965;border-radius:12px}.answer:disabled{opacity:1}.answer.correct{border-color:#22c55e;background:#123525}.answer.wrong{border-color:#ef4444;background:#3a1b25}
+.letter{background:#2b3e59;border-radius:8px;padding:8px 10px;font-weight:bold}.feedback{padding:13px;border-radius:10px;margin-top:14px;background:#123525;color:#bbf7d0}.bad{background:#3a1b25;color:#fecdd3}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}.stat{background:#17263d;border:1px solid var(--line);border-radius:12px;padding:15px}.stat strong{font-size:27px;display:block}.adminlink{display:block;text-align:center;color:#8da2c0;margin-top:20px;font-size:12px;text-decoration:none}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:10px 7px;border-bottom:1px solid var(--line)}.scroll{overflow:auto}
+</style></head>
+<body><main>
+<header><div class="brand">Cyber<span>X</span> AZ</div><div class="tag">IT KNOWLEDGE TEST</div></header>
+<section class="card" id="start">
+<div class="topic">Özünü yoxlamağın vaxtıdır</div><h1>IT biliklərin<br>nə yerdədir?</h1>
+<p>10 sadə IT sualını cavablandır. Sonda düzgün və səhv cavablarının sayını, balını gör.</p>
+<label for="participant">Adın</label><input id="participant" maxlength="50" placeholder="Adını yaz" autocomplete="name">
+<div class="pills"><span class="pill">10 sual</span><span class="pill">3–5 dəqiqə</span><span class="pill">100 bal</span></div>
+<button class="primary" id="startBtn">TESTƏ BAŞLA →</button><a class="adminlink" href="#admin">Admin paneli</a>
+</section>
+<section class="card hidden" id="quiz">
+<div class="row"><span id="count"></span><span id="pct"></span></div><div class="progress"><div class="fill" id="fill"></div></div>
+<div class="topic" id="topic"></div><h2 class="question" id="question"></h2><div class="answers" id="answers"></div>
+<div id="feedback" class="hidden"></div><button class="primary hidden" id="next" style="margin-top:17px">NÖVBƏTİ →</button>
+</section>
+<section class="card hidden" id="result"><div class="topic">Test tamamlandı</div><h1 id="resultTitle">Nəticən</h1><p id="resultText"></p>
+<div class="stats"><div class="stat"><strong id="right" style="color:#4ade80"></strong><span class="muted">Düzgün cavab</span></div><div class="stat"><strong id="wrong" style="color:#f87171"></strong><span class="muted">Səhv cavab</span></div></div>
+<button class="primary" onclick="location.reload()">YENİDƏN CƏHD ET</button></section>
+<section class="card hidden" id="admin"><h1>Admin paneli</h1><p>Yalnız idarəçi hesabı ilə giriş et.</p>
+<input id="email" placeholder="Admin e-poçtu" type="email"><input id="password" placeholder="Şifrə" type="password">
+<button class="primary" id="login">DAXİL OL</button><p id="adminMsg" class="muted"></p>
+<div id="dashboard" class="hidden"><div class="stats"><div class="stat"><strong id="total">0</strong><span class="muted">İştirakçı</span></div><div class="stat"><strong id="average">0</strong><span class="muted">Orta bal</span></div></div>
+<div class="scroll"><table><thead><tr><th>Ad</th><th>Düzgün</th><th>Səhv</th><th>Bal</th><th>Tarix</th></tr></thead><tbody id="rows"></tbody></table></div>
+<button class="primary" id="logout" style="margin-top:16px">ÇIXIŞ</button></div>
+</section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* QURAŞDIRMA: aşağıdakı iki dəyəri Supabase layihəndən götür və doldur. */
+const SUPABASE_URL = "SUPABASE_URL_BURAYA";
+const SUPABASE_ANON_KEY = "SUPABASE_ANON_KEY_BURAYA";
+const configured = SUPABASE_URL.startsWith("https://") && !SUPABASE_ANON_KEY.includes("BURAYA");
+const db = configured ? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY) : null;
+const questions=[
+{t:"Şəbəkə əsasları",q:"Router-in əsas funksiyası nədir?",a:["Kompüteri soyutmaq","Müxtəlif şəbəkələr arasında məlumat ötürmək","Faylları sıxmaq","Ekranın görüntüsünü artırmaq"],c:1,e:"Router müxtəlif IP şəbəkələri arasında paketləri yönləndirir."},
+{t:"IP ünvanları",q:"Aşağıdakılardan hansı private IPv4 ünvanıdır?",a:["8.8.8.8","1.1.1.1","192.168.1.10","45.12.3.4"],c:2,e:"192.168.0.0–192.168.255.255 private IP diapazonudur."},
+{t:"Protokollar",q:"HTTP üçün standart port hansıdır?",a:["21","25","80","443"],c:2,e:"HTTP standart olaraq TCP 80 portundan istifadə edir."},
+{t:"DNS",q:"DNS nə iş görür?",a:["Domen adını IP-yə çevirir","Virusları silir","Wi-Fi gücləndirir","Faylı sıxır"],c:0,e:"DNS domen adının uyğun IP ünvanını tapır."},
+{t:"TCP / UDP",q:"Hansı protokol çatdırılmaya nəzarət və yenidən ötürmə mexanizmi təqdim edir?",a:["UDP","TCP","ARP","ICMP"],c:1,e:"TCP etibarlı çatdırılma üçün təsdiq və yenidən ötürmə mexanizmlərindən istifadə edir."},
+{t:"Switch",q:"Adi Layer 2 switch əsasən hansı ünvana baxır?",a:["IP","MAC","URL","DNS"],c:1,e:"Layer 2 switch MAC ünvanlarına əsasən kadrları yönləndirir."},
+{t:"DHCP",q:"DHCP-nin əsas vəzifəsi nədir?",a:["Avtomatik IP parametrləri vermək","Sayt bloklamaq","Şifrə saxlamaq","Kabeli təmir etmək"],c:0,e:"DHCP IP, maska, gateway və DNS kimi parametrləri avtomatik verir."},
+{t:"Linux",q:"Linux-da fayl və qovluqları siyahılayan əmr hansıdır?",a:["cd","pwd","ls","mkdir"],c:2,e:"ls cari qovluqdakı fayl və qovluqları göstərir."},
+{t:"Kibertəhlükəsizlik",q:"Phishing nədir?",a:["Kabel növü","Aldadaraq məlumat ələ keçirmə cəhdi","Sürət testi","Backup"],c:1,e:"Phishing saxta mesaj və saytlarla həssas məlumatları ələ keçirməyə çalışır."},
+{t:"GPON",q:"GPON şəbəkəsində OLT adətən harada yerləşir?",a:["Abunəçinin telefonunda","Provayderin mərkəzi tərəfində","Televizorda","Wi-Fi adapterində"],c:1,e:"OLT provayderin mərkəzi tərəfində yerləşən optik giriş avadanlığıdır."}
+];
+let idx=0,good=0,bad=0,name="",locked=false;
+const $=id=>document.getElementById(id);
+function page(id){["start","quiz","result","admin"].forEach(x=>$(x).classList.toggle("hidden",x!==id))}
+function start(){name=$("participant").value.trim();if(!name){alert("Zəhmət olmasa adını yaz.");return}idx=0;good=0;bad=0;page("quiz");draw()}
+function draw(){locked=false;let q=questions[idx];$("count").textContent=`Sual ${idx+1} / 10`;$("pct").textContent=`${(idx+1)*10}%`;$("fill").style.width=`${(idx+1)*10}%`;$("topic").textContent=q.t;$("question").textContent=q.q;$("feedback").className="hidden";$("next").classList.add("hidden");$("answers").innerHTML="";
+q.a.forEach((a,i)=>{let b=document.createElement("button");b.className="answer";let l=document.createElement("span");l.className="letter";l.textContent="ABCD"[i];let s=document.createElement("span");s.textContent=a;b.append(l,s);b.onclick=()=>choose(i,b);$("answers").append(b)})}
+function choose(n,btn){if(locked)return;locked=true;let q=questions[idx],bs=[...$("answers").children];bs.forEach((b,i)=>{b.disabled=true;if(i===q.c)b.classList.add("correct")});let f=$("feedback");if(n===q.c){good++;f.textContent="✓ Düzgün! "+q.e;f.className="feedback"}else{bad++;btn.classList.add("wrong");f.textContent="✕ Səhv. Düzgün cavab: "+q.a[q.c]+". "+q.e;f.className="feedback bad"}$("next").textContent=idx===9?"NƏTİCƏYƏ BAX":"NÖVBƏTİ SUAL";$("next").classList.remove("hidden")}
+async function finish(){page("result");let score=good*10;$("right").textContent=good;$("wrong").textContent=bad;$("resultTitle").textContent=score>=90?"Möhtəşəm nəticə!":score>=70?"Çox yaxşı!":score>=40?"Yaxşı başlanğıcdır!":"Davam et, bacaracaqsan!";$("resultText").textContent=`${name}, ${score}/100 bal topladın.`;if(db){const {error}=await db.from("quiz_results").insert({participant_name:name,correct_answers:good,wrong_answers:bad,score});if(error)console.error("Nəticə yadda saxlanmadı:",error.message)}}
+$("startBtn").onclick=start;$("next").onclick=()=>{if(idx<9){idx++;draw()}else finish()};
+$("login").onclick=async()=>{if(!db){$("adminMsg").textContent="Əvvəlcə README faylındakı Supabase quraşdırmasını tamamla.";return}let {error}=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});if(error){$("adminMsg").textContent="Giriş alınmadı: "+error.message;return}loadAdmin()};
+async function loadAdmin(){let {data:{user}}=await db.auth.getUser();if(!user)return;let {data,error}=await db.from("quiz_results").select("*").order("created_at",{ascending:false});if(error){$("adminMsg").textContent=error.message;return}$("dashboard").classList.remove("hidden");$("total").textContent=data.length;$("average").textContent=data.length?Math.round(data.reduce((s,x)=>s+x.score,0)/data.length):0;$("rows").innerHTML="";data.forEach(x=>{let tr=document.createElement("tr");[x.participant_name,x.correct_answers,x.wrong_answers,x.score,new Date(x.created_at).toLocaleString("az-AZ")].forEach(v=>{let td=document.createElement("td");td.textContent=v;tr.append(td)});$("rows").append(tr)})}
+$("logout").onclick=async()=>{await db.auth.signOut();$("dashboard").classList.add("hidden");$("adminMsg").textContent="Hesabdan çıxış edildi."};
+if(location.hash==="#admin")page("admin");
+</script></body></html>
