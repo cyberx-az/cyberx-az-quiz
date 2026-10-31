@@ -62,4 +62,144 @@ const questions=[
 {t:"IP ünvanları",q:"Aşağıdakılardan hansı private IPv4 ünvanıdır?",a:["8.8.8.8","1.1.1.1","192.168.1.10","45.12.3.4"],c:2,e:"192.168.0.0–192.168.255.255 private IP diapazonudur."},
 {t:"Protokollar",q:"HTTP üçün standart port hansıdır?",a:["21","25","80","443"],c:2,e:"HTTP standart olaraq TCP 80 portundan istifadə edir."},
 {t:"DNS",q:"DNS nə iş görür?",a:["Domen adını IP-yə çevirir","Virusları silir","Wi-Fi gücləndirir","Faylı sıxır"],c:0,e:"DNS domen adının uyğun IP ünvanını tapır."},
-{t:"TCP / UDP",q:"Hansı protokol çatdırılmaya nəzarət və yenidən ötürmə
+{t:"TCP / UDP",q:"Hansı protokol çatdırılmaya nəzarət və yenidən ötürmə mexanizmi təqdim edir?",a:["UDP","TCP","ARP","ICMP"],c:1,e:"TCP etibarlı çatdırılma üçün təsdiq və yenidən ötürmə mexanizmlərindən istifadə edir."},
+{t:"Switch",q:"Adi Layer 2 switch əsasən hansı ünvana baxır?",a:["IP","MAC","URL","DNS"],c:1,e:"Layer 2 switch MAC ünvanlarına əsasən kadrları yönləndirir."},
+{t:"DHCP",q:"DHCP-nin əsas vəzifəsi nədir?",a:["Avtomatik IP parametrləri vermək","Sayt bloklamaq","Şifrə saxlamaq","Kabeli təmir etmək"],c:0,e:"DHCP IP, maska, gateway və DNS kimi parametrləri avtomatik verir."},
+{t:"Linux",q:"Linux-da fayl və qovluqları siyahılayan əmr hansıdır?",a:["cd","pwd","ls","mkdir"],c:2,e:"ls cari qovluqdakı fayl və qovluqları göstərir."},
+{t:"Kibertəhlükəsizlik",q:"Phishing nədir?",a:["Kabel növü","Aldadaraq məlumat ələ keçirmə cəhdi","Sürət testi","Backup"],c:1,e:"Phishing saxta mesaj və saytlarla həssas məlumatları ələ keçirməyə çalışır."},
+{t:"GPON",q:"GPON şəbəkəsində OLT adətən harada yerləşir?",a:["Abunəçinin telefonunda","Provayderin mərkəzi tərəfində","Televizorda","Wi-Fi adapterində"],c:1,e:"OLT provayderin mərkəzi tərəfindən yerləşən optik giriş avadanlığıdır."}
+];
+let idx=0,good=0,bad=0,userName="",locked=false;
+const $=id=>document.getElementById(id);
+
+function page(id){["start","quiz","result","admin"].forEach(x=>$(x).classList.toggle("hidden",x!==id))}
+
+function handleRoute(){
+  if(location.hash==="#admin"){
+    page("admin");
+    if(db){
+      db.auth.getUser().then(({data:{user}})=>{
+        if(user) loadAdmin();
+      });
+    }
+  } else {
+    page("start");
+  }
+}
+
+window.addEventListener('hashchange', handleRoute);
+window.addEventListener('load', handleRoute);
+
+function startTest(){
+  let inputVal = $("participant").value.trim();
+  if(!inputVal){
+    alert("Zəhmət olmasa adını yaz.");
+    return;
+  }
+  userName = inputVal;
+  idx=0; good=0; bad=0;
+  page("quiz");
+  draw();
+}
+
+function draw(){
+  locked=false;
+  let q=questions[idx];
+  $("count").textContent=`Sual ${idx+1} / 10`;
+  $("pct").textContent=`${(idx+1)*10}%`;
+  $("fill").style.width=`${(idx+1)*10}%`;
+  $("topic").textContent=q.t;
+  $("question").textContent=q.q;
+  $("feedback").className="hidden";
+  $("next").classList.add("hidden");
+  $("answers").innerHTML="";
+  
+  q.a.forEach((a,i)=>{
+    let b=document.createElement("button");
+    b.className="answer";
+    let l=document.createElement("span");
+    l.className="letter";
+    l.textContent="ABCD"[i];
+    let s=document.createElement("span");
+    s.textContent=a;
+    b.append(l,s);
+    b.onclick=()=>choose(i,b);
+    $("answers").append(b);
+  });
+}
+
+function choose(n,btn){
+  if(locked)return;
+  locked=true;
+  let q=questions[idx],bs=[...$("answers").children];
+  bs.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.c)b.classList.add("correct");
+  });
+  let f=$("feedback");
+  if(n===q.c){
+    good++;
+    f.textContent="✓ Düzgün! "+q.e;
+    f.className="feedback";
+  }else{
+    bad++;
+    btn.classList.add("wrong");
+    f.textContent="✕ Səhv. Düzgün cavab: "+q.a[q.c]+". "+q.e;
+    f.className="feedback bad";
+  }
+  $("next").textContent=idx===9?"NƏTİCƏYƏ BAX":"NÖVBƏTİ SUAL";
+  $("next").classList.remove("hidden");
+}
+
+async function finish(){
+  page("result");
+  let score=good*10;
+  $("right").textContent=good;
+  $("wrong").textContent=bad;
+  $("resultTitle").textContent=score>=90?"Möhtəşəm nəticə!":score>=70?"Çox yaxşı!":score>=40?"Yaxşı başlanğıcdır!":"Davam et, bacaracaqsan!";
+  $("resultText").textContent=`${userName}, ${score}/100 bal topladın.`;
+  if(db){
+    const {error}=await db.from("quiz_results").insert({participant_name:userName,correct_answers:good,wrong_answers:bad,score});
+    if(error)console.error("Nəticə yadda saxlanmadı:",error.message);
+  }
+}
+
+$("next").onclick=()=>{if(idx<9){idx++;draw()}else finish()};
+
+$("login").onclick=async()=>{
+  if(!db){$("adminMsg").textContent="Supabase konfiqurasiyası tapılmadı.";return}
+  $("adminMsg").textContent="Giriş edilir...";
+  let {error}=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});
+  if(error){$("adminMsg").textContent="Giriş alınmadı: "+error.message;return}
+  $("adminMsg").textContent="";
+  loadAdmin();
+};
+
+async function loadAdmin(){
+  let {data:{user}}=await db.auth.getUser();
+  if(!user) return;
+  let {data,error}=await db.from("quiz_results").select("*").order("created_at",{ascending:false});
+  if(error){$("adminMsg").textContent=error.message;return}
+  $("loginForm").classList.add("hidden");
+  $("dashboard").classList.remove("hidden");
+  $("total").textContent=data.length;
+  $("average").textContent=data.length?Math.round(data.reduce((s,x)=>s+x.score,0)/data.length):0;
+  $("rows").innerHTML="";
+  data.forEach(x=>{
+    let tr=document.createElement("tr");
+    [x.participant_name,x.correct_answers,x.wrong_answers,x.score,new Date(x.created_at).toLocaleString("az-AZ")].forEach(v=>{
+      let td=document.createElement("td");
+      td.textContent=v;
+      tr.append(td);
+    });
+    $("rows").append(tr);
+  });
+}
+
+$("logout").onclick=async()=>{
+  if(db) await db.auth.signOut();
+  $("dashboard").classList.add("hidden");
+  $("loginForm").classList.remove("hidden");
+  $("adminMsg").textContent="Hesabdan çıxış edildi.";
+};
+</script></body></html>
