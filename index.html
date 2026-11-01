@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="az">
 <head>
@@ -159,16 +160,25 @@ const SUPABASE_ANON_KEY = "sb_publishable_4Z4mDmXQ8j5VkoN8nfvotg_SQXwqQsj";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const questions = [
-{topic:"Şəbəkə əsasları",q:"Router-in əsas funksiyası nədir?",a:["Kompüteri soyutmaq","Müxtəlif şəbəkələr arasında məlumat ötürmək","Faylları sıxmaq","Ekranın görüntüsünü artırmaq"],c:1,e:"Router müxtəlif IP şəbəkələri arasında paketləri yönləndirir."},
-{topic:"IP ünvanları",q:"Aşağıdakılardan hansı private IPv4 ünvanıdır?",a:["8.8.8.8","1.1.1.1","192.168.1.10","45.12.3.4"],c:2,e:"192.168.0.0–192.168.255.255 aralığı private IP diapazonudur."},
-{topic:"Protokollar",q:"HTTP üçün standart port hansıdır?",a:["21","25","80","443"],c:2,e:"HTTP-nin standart portu TCP 80-dir. HTTPS isə adətən TCP 443 istifadə edir."},
-{topic:"DNS",q:"DNS nə iş görür?",a:["Domen adını IP ünvanına çevirir","Kompüteri viruslardan təmizləyir","Wi-Fi siqnalını gücləndirir","Faylları ehtiyat nüsxələyir"],c:0,e:"DNS, məsələn, example.com domeninin uyğun IP ünvanını tapmağa kömək edir."},
-{topic:"TCP / UDP",q:"Hansı protokol məlumatın çatdırılmasına nəzarət və yenidən ötürmə mexanizmləri təqdim edir?",a:["UDP","TCP","ARP","ICMP"],c:1,e:"TCP bağlantı yönümlüdür və itən məlumatın yenidən ötürülməsini təmin edə bilir."},
-{topic:"Şəbəkə avadanlığı",q:"Switch əsasən hansı səviyyədə işləyir?",a:["OSI Layer 1","OSI Layer 2","OSI Layer 5","OSI Layer 7"],c:1,e:"Adi Layer 2 switch MAC ünvanlarına əsasən kadrları yönləndirir."},
-{topic:"DHCP",q:"DHCP-nin əsas vəzifəsi nədir?",a:["Avtomatik IP parametrləri vermək","Saytları bloklamaq","Şifrələri yadda saxlamaq","Kabeli yoxlamaq"],c:0,e:"DHCP cihazlara IP ünvanı, subnet mask, gateway və DNS kimi parametrləri avtomatik verir."},
-{topic:"Linux",q:"Linux terminalında cari qovluğun fayllarını göstərən əmr hansıdır?",a:["cd","pwd","ls","mkdir"],c:2,e:"ls cari qovluqdakı fayl və qovluqları siyahılayır."},
-{topic:"Kibertəhlükəsizlik",q:"Phishing nədir?",a:["Şəbəkə kabelinin növü","İstifadəçini aldadaraq məlumatını ələ keçirmə cəhdi","Kompüterin sürət testi","Məlumatın ehtiyat nüsxəsi"],c:1,e:"Phishing saxta mesaj və saytlarla parol və digər həssas məlumatları əldə etməyə çalışan hücum növüdür."},
-{topic:"GPON",q:"GPON şəbəkəsində OLT adətən harada yerləşir?",a:["Abunəçinin telefonunda","Provayderin mərkəzi tərəfində","Televizorun içində","Wi-Fi adapterində"],c:1,e:"OLT provayderin mərkəzi avadanlığıdır və optik giriş şəbəkəsini idarə edir."}
+{topic:"Windows",q:"Windows-da IP ünvanı, subnet mask və gateway məlumatlarını görmək üçün hansı əmr istifadə olunur?",a:["ping","ipconfig","tracert","netstat"],c:1,e:"ipconfig kompüterin şəbəkə parametrlərini göstərir. Daha ətraflı məlumat üçün ipconfig /all istifadə olunur."},
+
+{topic:"MAC ünvanı",q:"Standart MAC ünvanı neçə bitdən ibarətdir?",a:["16 bit","32 bit","48 bit","128 bit"],c:2,e:"MAC ünvanı 48 bitdən, yəni 6 baytdan ibarətdir. Adətən 12 hexadecimal simvolla yazılır."},
+
+{topic:"VLAN",q:"VLAN texnologiyasının əsas məqsədi nədir?",a:["İnterneti sürətləndirmək","Bir fiziki şəbəkəni məntiqi şəbəkələrə bölmək","Kompüterə IP vermək","Wi-Fi siqnalını artırmaq"],c:1,e:"VLAN bir fiziki switch üzərində cihazları məntiqi olaraq ayrı şəbəkələrə bölməyə imkan verir."},
+
+{topic:"Default Gateway",q:"Default Gateway işləməsə belə, eyni lokal şəbəkədə olan iki kompüter bir-biri ilə əlaqə saxlaya bilərmi?",a:["Bəli","Xeyr","Yalnız DNS işləyərsə","Yalnız internet varsa"],c:0,e:"Eyni subnet daxilində cihazlar bir-biri ilə birbaşa əlaqə saxlaya bilər. Gateway əsasən başqa şəbəkələrə çıxış üçün lazımdır."},
+
+{topic:"ARP",q:"ARP protokolu nə üçün istifadə olunur?",a:["Domen adını IP-yə çevirmək","IPv4 ünvanına uyğun MAC ünvanını tapmaq","IP ünvanı paylamaq","Məlumatı şifrələmək"],c:1,e:"ARP lokal şəbəkədə məlum IPv4 ünvanına uyğun MAC ünvanını müəyyən etməyə kömək edir."},
+
+{topic:"HTTPS / TLS",q:"HTTPS bağlantısında məlumatların şifrələnməsi üçün hansı texnologiyadan istifadə olunur?",a:["FTP","ARP","TLS","DHCP"],c:2,e:"TLS internet üzərindən ötürülən məlumatların məxfiliyini və bütövlüyünü qorumağa kömək edir."},
+
+{topic:"APIPA",q:"Kompüter DHCP serverindən IP ala bilmədikdə hansı diapazondan avtomatik IP götürə bilər?",a:["192.168.1.0/24","10.0.0.0/8","169.254.0.0/16","8.8.8.0/24"],c:2,e:"Windows DHCP-dən IP ala bilmədikdə APIPA vasitəsilə 169.254.x.x ünvanı təyin edə bilər."},
+
+{topic:"Linux",q:"Linux terminalında hazırda hansı istifadəçi ilə daxil olduğunu göstərən əmr hansıdır?",a:["whoami","mkdir","clear","touch"],c:0,e:"whoami əmri terminalda aktiv istifadəçinin adını göstərir."},
+
+{topic:"Wi-Fi təhlükəsizliyi",q:"Ev Wi-Fi şəbəkəsinin təhlükəsizliyini artırmaq üçün hansı seçim daha doğrudur?",a:["Açıq Wi-Fi istifadə etmək","Zəif və sadə şifrə qoymaq","WPA3 və güclü şifrə istifadə etmək","Router-in admin şifrəsini dəyişməmək"],c:2,e:"WPA3 və güclü, unikal şifrə Wi-Fi şəbəkəsinin qorunmasını artırır."},
+
+{topic:"Nmap",q:"Nmap proqramında -sV parametrinin əsas məqsədi nədir?",a:["Şəbəkəni söndürmək","Açıq portlardakı servisləri və versiyalarını müəyyən etmək","IP ünvanını dəyişmək","Faylları şifrələmək"],c:1,e:"Nmap -sV açıq portlarda işləyən servisləri və onların versiyalarını müəyyən etməyə çalışır."}
 ];
 
 let index=0, correct=0, wrong=0, locked=false, participantName='', lastResult=null;
