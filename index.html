@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0b1220">
 <title>CyberX AZ | IT Quiz</title>
 <style>
-:root{--bg:#09111f;--panel:#111e31;--panel2:#172840;--line:#2a405d;--text:#f1f6ff;--muted:#9fb0c8;--blue:#38a7ff;--green:#29d391;--red:#ff667d}
+:root{--bg:#09111f;--panel:#111e31;--line:#2a405d;--text:#f1f6ff;--muted:#9fb0c8;--blue:#38a7ff}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 10% 0%,#173457 0,transparent 38%),linear-gradient(145deg,#080f1c,#101d30);color:var(--text);font-family:Inter,Arial,sans-serif;padding:24px 14px}
 .app{max-width:760px;margin:auto}
@@ -43,7 +43,6 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px
 .answer:disabled{cursor:default}
 .feedback{margin-top:17px;padding:14px;border-radius:12px;background:#10372d;border:1px solid #23684f;color:#baf5d9;line-height:1.55;font-size:14px}
 .feedback.bad{background:#3b202a;border-color:#78384a;color:#ffd0da}
-.next{margin-top:18px}
 .score-ring{width:150px;height:150px;border-radius:50%;margin:22px auto;display:grid;place-items:center;background:conic-gradient(var(--blue) var(--score),#26364f 0);position:relative}
 .score-ring:before{content:"";position:absolute;inset:10px;border-radius:50%;background:#111e31}
 .score-inner{position:relative;text-align:center}
@@ -60,7 +59,7 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px
 .tablewrap{overflow:auto}
 .admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 .admin-actions button{flex:1}
-.status{font-size:12px;color:#a9bed7;margin-top:12px;min-height:18px}
+.status{font-size:12px;color:#a9bed7;margin-top:12px;min-height:18px;overflow-wrap:anywhere}
 @media(max-width:480px){body{padding:14px 9px}.card{border-radius:16px}.tag{font-size:9px}.admin-table{font-size:12px}}
 </style>
 </head>
@@ -98,7 +97,7 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px
 <h2 id="question"></h2>
 <div class="answers" id="answers"></div>
 <div id="feedback" class="hidden"></div>
-<button class="primary next hidden" id="nextBtn">NÖVBƏTİ SUAL →</button>
+<button class="primary hidden" id="nextBtn">NÖVBƏTİ SUAL →</button>
 </section>
 
 <section class="card hidden" id="result">
@@ -152,8 +151,6 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Supabase məlumatları
-// Publishable/anon key istifadə et. service_role açarını heç vaxt brauzerə qoyma.
 const SUPABASE_URL = "https://chkatxaiuaaynhdkzvsd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_4Z4mDmXQ8j5VkoN8nfvotg_SQXwqQsj";
 
@@ -161,31 +158,22 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const questions = [
 {topic:"Windows",q:"Windows-da IP ünvanı, subnet mask və gateway məlumatlarını görmək üçün hansı əmr istifadə olunur?",a:["ping","ipconfig","tracert","netstat"],c:1,e:"ipconfig kompüterin şəbəkə parametrlərini göstərir. Daha ətraflı məlumat üçün ipconfig /all istifadə olunur."},
-
-{topic:"MAC ünvanı",q:"Standart MAC ünvanı neçə bitdən ibarətdir?",a:["16 bit","32 bit","48 bit","128 bit"],c:2,e:"MAC ünvanı 48 bitdən, yəni 6 baytdan ibarətdir. Adətən 12 hexadecimal simvolla yazılır."},
-
+{topic:"MAC ünvanı",q:"Standart MAC ünvanı neçə bitdən ibarətdir?",a:["16 bit","32 bit","48 bit","128 bit"],c:2,e:"MAC ünvanı 48 bitdən, yəni 6 baytdan ibarətdir."},
 {topic:"VLAN",q:"VLAN texnologiyasının əsas məqsədi nədir?",a:["İnterneti sürətləndirmək","Bir fiziki şəbəkəni məntiqi şəbəkələrə bölmək","Kompüterə IP vermək","Wi-Fi siqnalını artırmaq"],c:1,e:"VLAN bir fiziki switch üzərində cihazları məntiqi olaraq ayrı şəbəkələrə bölməyə imkan verir."},
-
-{topic:"Default Gateway",q:"Default Gateway işləməsə belə, eyni lokal şəbəkədə olan iki kompüter bir-biri ilə əlaqə saxlaya bilərmi?",a:["Bəli","Xeyr","Yalnız DNS işləyərsə","Yalnız internet varsa"],c:0,e:"Eyni subnet daxilində cihazlar bir-biri ilə birbaşa əlaqə saxlaya bilər. Gateway əsasən başqa şəbəkələrə çıxış üçün lazımdır."},
-
+{topic:"Default Gateway",q:"Default Gateway işləməsə belə, eyni lokal şəbəkədə olan iki kompüter bir-biri ilə əlaqə saxlaya bilərmi?",a:["Bəli","Xeyr","Yalnız DNS işləyərsə","Yalnız internet varsa"],c:0,e:"Eyni subnet daxilində cihazlar bir-biri ilə birbaşa əlaqə saxlaya bilər. Gateway başqa şəbəkələrə çıxış üçün lazımdır."},
 {topic:"ARP",q:"ARP protokolu nə üçün istifadə olunur?",a:["Domen adını IP-yə çevirmək","IPv4 ünvanına uyğun MAC ünvanını tapmaq","IP ünvanı paylamaq","Məlumatı şifrələmək"],c:1,e:"ARP lokal şəbəkədə məlum IPv4 ünvanına uyğun MAC ünvanını müəyyən etməyə kömək edir."},
-
 {topic:"HTTPS / TLS",q:"HTTPS bağlantısında məlumatların şifrələnməsi üçün hansı texnologiyadan istifadə olunur?",a:["FTP","ARP","TLS","DHCP"],c:2,e:"TLS internet üzərindən ötürülən məlumatların məxfiliyini və bütövlüyünü qorumağa kömək edir."},
-
 {topic:"APIPA",q:"Kompüter DHCP serverindən IP ala bilmədikdə hansı diapazondan avtomatik IP götürə bilər?",a:["192.168.1.0/24","10.0.0.0/8","169.254.0.0/16","8.8.8.0/24"],c:2,e:"Windows DHCP-dən IP ala bilmədikdə APIPA vasitəsilə 169.254.x.x ünvanı təyin edə bilər."},
-
 {topic:"Linux",q:"Linux terminalında hazırda hansı istifadəçi ilə daxil olduğunu göstərən əmr hansıdır?",a:["whoami","mkdir","clear","touch"],c:0,e:"whoami əmri terminalda aktiv istifadəçinin adını göstərir."},
-
 {topic:"Wi-Fi təhlükəsizliyi",q:"Ev Wi-Fi şəbəkəsinin təhlükəsizliyini artırmaq üçün hansı seçim daha doğrudur?",a:["Açıq Wi-Fi istifadə etmək","Zəif və sadə şifrə qoymaq","WPA3 və güclü şifrə istifadə etmək","Router-in admin şifrəsini dəyişməmək"],c:2,e:"WPA3 və güclü, unikal şifrə Wi-Fi şəbəkəsinin qorunmasını artırır."},
-
 {topic:"Nmap",q:"Nmap proqramında -sV parametrinin əsas məqsədi nədir?",a:["Şəbəkəni söndürmək","Açıq portlardakı servisləri və versiyalarını müəyyən etmək","IP ünvanını dəyişmək","Faylları şifrələmək"],c:1,e:"Nmap -sV açıq portlarda işləyən servisləri və onların versiyalarını müəyyən etməyə çalışır."}
 ];
 
-let index=0, correct=0, wrong=0, locked=false, participantName='', lastResult=null;
-const $ = id => document.getElementById(id);
+let index=0,correct=0,wrong=0,locked=false,participantName='',lastResult=null;
+const $=id=>document.getElementById(id);
 
 function show(id){
-['start','quiz','result','admin'].forEach(x => $(x).classList.toggle('hidden',x!==id));
+['start','quiz','result','admin'].forEach(x=>$(x).classList.toggle('hidden',x!==id));
 }
 
 function begin(){
@@ -231,12 +219,10 @@ function choose(choice,button){
 if(locked)return;
 locked=true;
 const q=questions[index];
-
 [...$('answers').children].forEach((b,i)=>{
 b.disabled=true;
 if(i===q.c)b.classList.add('correct');
 });
-
 const fb=$('feedback');
 if(choice===q.c){
 correct++;
@@ -248,7 +234,6 @@ button.classList.add('wrong');
 fb.textContent='✕ Səhv cavab. Düzgün cavab: '+q.a[q.c]+'. '+q.e;
 fb.className='feedback bad';
 }
-
 $('nextBtn').textContent=index===questions.length-1?'NƏTİCƏYƏ BAX →':'NÖVBƏTİ SUAL →';
 $('nextBtn').classList.remove('hidden');
 }
@@ -256,7 +241,6 @@ $('nextBtn').classList.remove('hidden');
 async function finish(){
 show('result');
 const score=correct*10;
-
 $('score').textContent=score;
 $('correct').textContent=correct;
 $('wrong').textContent=wrong;
@@ -264,17 +248,9 @@ $('ring').style.setProperty('--score',score+'%');
 
 let title='Davam et, bacaracaqsan!';
 let msg='Hər test yeni bilik qazanmaq üçün fürsətdir.';
-
-if(score===100){
-title='Möhtəşəm nəticə! 🏆';
-msg='10 sualın hamısına düzgün cavab verdin. Əhsən!';
-}else if(score>=70){
-title='Çox yaxşı! 🔥';
-msg='IT biliklərin yaxşı səviyyədədir. Belə davam et!';
-}else if(score>=40){
-title='Yaxşı başlanğıcdır! 💪';
-msg='Əsasları bilirsən. Bir az da məşq etsən, nəticən artacaq.';
-}
+if(score===100){title='Möhtəşəm nəticə! 🏆';msg='10 sualın hamısına düzgün cavab verdin. Əhsən!';}
+else if(score>=70){title='Çox yaxşı! 🔥';msg='IT biliklərin yaxşı səviyyədədir. Belə davam et!';}
+else if(score>=40){title='Yaxşı başlanğıcdır! 💪';msg='Əsasları bilirsən. Bir az da məşq etsən, nəticən artacaq.';}
 
 $('resultTitle').textContent=title;
 $('resultText').textContent=`${questions.length} sualı tamamladın. Nəticən: ${score} bal.`;
@@ -282,7 +258,7 @@ $('message').textContent=msg;
 
 lastResult={
 participant_name:participantName,
-score,
+score:score,
 correct_answers:correct,
 wrong_answers:wrong,
 total_questions:questions.length,
@@ -291,22 +267,29 @@ answers:questions.map(q=>({question:q.q,correct_answer:q.a[q.c]}))
 
 $('saveStatus').textContent='Nəticə yadda saxlanılır...';
 
-const {error}=await db.from('quiz_results').insert(lastResult);
+try{
+const {data,error}=await db
+.from('quiz_results')
+.insert(lastResult)
+.select();
 
-$('saveStatus').textContent=error
-?'Nəticə bazaya yazılmadı. Supabase cədvəl və RLS sazlamasını yoxlamaq lazımdır.'
-:'✓ Nəticən uğurla yadda saxlanıldı.';
+if(error){
+console.error('Supabase error:',error);
+$('saveStatus').textContent='XƏTA: '+error.message+' | Kod: '+error.code+' | Detal: '+(error.details||'')+' | İpucu: '+(error.hint||'');
+}else{
+$('saveStatus').textContent='✓ Nəticən uğurla yadda saxlanıldı.';
+}
+}catch(err){
+console.error(err);
+$('saveStatus').textContent='XƏTA: '+err.message;
+}
 }
 
 $('startBtn').addEventListener('click',begin);
 
 $('nextBtn').addEventListener('click',()=>{
-if(index<questions.length-1){
-index++;
-render();
-}else{
-finish();
-}
+if(index<questions.length-1){index++;render();}
+else{finish();}
 });
 
 $('restartBtn').addEventListener('click',()=>{
@@ -319,17 +302,14 @@ $('backBtn').addEventListener('click',()=>show('start'));
 
 $('loginBtn').addEventListener('click',async()=>{
 $('adminStatus').textContent='Giriş yoxlanılır...';
-
 const {error}=await db.auth.signInWithPassword({
 email:$('adminEmail').value.trim(),
 password:$('adminPassword').value
 });
-
 if(error){
 $('adminStatus').textContent='Giriş alınmadı: '+error.message;
 return;
 }
-
 $('adminLogin').classList.add('hidden');
 $('adminData').classList.remove('hidden');
 loadResults();
@@ -337,7 +317,6 @@ loadResults();
 
 async function loadResults(){
 $('adminStatus').textContent='Nəticələr yüklənir...';
-
 const {data,error}=await db
 .from('quiz_results')
 .select('id,participant_name,score,correct_answers,wrong_answers,created_at')
@@ -351,19 +330,15 @@ return;
 
 window.quizAdminRows=data||[];
 $('resultsBody').innerHTML='';
-
 window.quizAdminRows.forEach(r=>{
 const tr=document.createElement('tr');
-
 [r.participant_name,r.score,r.correct_answers,r.wrong_answers,new Date(r.created_at).toLocaleString('az-AZ')].forEach(v=>{
 const td=document.createElement('td');
 td.textContent=v??'';
 tr.append(td);
 });
-
 $('resultsBody').append(tr);
 });
-
 $('adminStatus').textContent=`Cəmi ${window.quizAdminRows.length} nəticə göstərilir.`;
 }
 
@@ -378,18 +353,12 @@ $('adminStatus').textContent='Sessiyadan çıxıldı.';
 
 $('csvBtn').addEventListener('click',()=>{
 const rows=window.quizAdminRows||[];
-
 const csv=[
 'Ad,Bal,Duzgun,Səhv,Tarix',
 ...rows.map(r=>[
-r.participant_name,
-r.score,
-r.correct_answers,
-r.wrong_answers,
-r.created_at
+r.participant_name,r.score,r.correct_answers,r.wrong_answers,r.created_at
 ].map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(','))
 ].join('\n');
-
 const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
 const a=document.createElement('a');
 a.href=URL.createObjectURL(blob);
