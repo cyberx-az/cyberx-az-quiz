@@ -157,16 +157,126 @@ const SUPABASE_ANON_KEY = "sb_publishable_4Z4mDmXQ8j5VkoN8nfvotg_SQXwqQsj";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const questions = [
-{topic:"OSI modeli",q:"OSI modelində Router əsasən hansı Layer-də işləyir?",a:["Layer 1 – Physical","Layer 2 – Data Link","Layer 3 – Network","Layer 7 – Application"],c:2,e:"Router IP ünvanlarına əsasən Layer 3-də paketləri yönləndirir."},
-{topic:"STP",q:"Switch-lərdə STP protokolunun əsas məqsədi nədir?",a:["Şəbəkə dövrələrinin (loop) qarşısını almaq","IP ünvanı paylamaq","Wi-Fi şifrələmək","Port sürətini artırmaq"],c:0,e:"STP redundant bağlantılar zamanı Layer 2 loop yaranmasının qarşısını alır."},
-{topic:"PoE",q:"PoE texnologiyası nə üçün istifadə olunur?",a:["Optik siqnalı gücləndirmək","Ethernet kabeli ilə həm enerji, həm də data ötürmək","IP ünvanını dəyişmək","Serveri soyutmaq"],c:1,e:"PoE IP kamera və Access Point kimi cihazları Ethernet kabeli ilə enerji ilə təmin edir."},
-{topic:"RAID",q:"RAID 1 texnologiyasının əsas xüsusiyyəti hansıdır?",a:["Disklərin məlumatı güzgüləməsi (mirroring)","Disklərin sürət üçün birləşdirilməsi, qorunmasız","Məlumatın avtomatik şifrələnməsi","Diskin internetə qoşulması"],c:0,e:"RAID 1 məlumatı iki diskə eyni vaxtda yazaraq disk nasazlığına qarşı davamlılıq yaradır."},
-{topic:"Virtualizasiya",q:"Virtual maşınları yaratmaq və idarə etmək üçün istifadə olunan proqram təminatı necə adlanır?",a:["Compiler","Hypervisor","Browser","Firewall"],c:1,e:"Hypervisor fiziki resursları bölüşdürərək virtual maşınların işləməsini təmin edir."},
-{topic:"HTTP",q:"HTTP 404 status kodu nə deməkdir?",a:["Server işləyir","Sorğu uğurla tamamlandı","Axtarılan resurs tapılmadı","Server daxili xətası baş verdi"],c:2,e:"404 Not Found – server tələb olunan səhifəni və ya resursu tapa bilməyib."},
-{topic:"MFA",q:"MFA (Multi-Factor Authentication) nə deməkdir?",a:["Bir şifrəni iki dəfə yazmaq","İstifadəçinin şəxsiyyətini bir neçə fərqli faktorla təsdiqləmək","İki kompüteri birləşdirmək","İki antivirus quraşdırmaq"],c:1,e:"MFA şifrə ilə yanaşı telefon təsdiqi və ya biometrik yoxlama kimi əlavə faktor tələb edə bilər."},
-{topic:"Backup",q:"3-2-1 backup qaydasına əsasən neçə ehtiyat nüsxə saxlanmalıdır?",a:["1","2","3","5"],c:2,e:"3-2-1 qaydası: məlumatın 3 nüsxəsi, 2 fərqli daşıyıcıda, 1 nüsxə isə başqa məkanda."},
-{topic:"UPS",q:"UPS cihazının əsas funksiyası nədir?",a:["İnterneti sürətləndirmək","Elektrik kəsildikdə müvəqqəti enerji təmin etmək","Şəbəkəni viruslardan təmizləmək","IP ünvanı vermək"],c:1,e:"UPS elektrik kəsildikdə kompüter və şəbəkə avadanlığını batareya vasitəsilə müvəqqəti işlək saxlayır."},
-{topic:"SFP",q:"SFP modulunun əsas məqsədi nədir?",a:["Switch və digər şəbəkə cihazlarında optik və ya uyğun Ethernet bağlantısı yaratmaq","Kompüterə RAM əlavə etmək","Router-i yenidən başlatmaq","Wi-Fi şifrəsini dəyişmək"],c:0,e:"SFP modul cihazın uyğun portu vasitəsilə optik və ya dəstəklənən mis kabel bağlantısı yaratmağa imkan verir."}
+{
+topic:"Network – VLAN",
+q:"VLAN nə üçün istifadə olunur?",
+a:[
+"Şəbəkəni məntiqi hissələrə bölmək",
+"İnternet sürətini artırmaq",
+"Kompüteri söndürmək",
+"DNS ünvanını dəyişmək"
+],
+c:0,
+e:"VLAN bir fiziki şəbəkəni bir neçə məntiqi şəbəkəyə bölməyə imkan verir. Bu, şəbəkənin idarə edilməsini və təhlükəsizliyini yaxşılaşdırır."
+},
+{
+topic:"Network – OSPF",
+q:"OSPF protokolunun əsas funksiyası nədir?",
+a:[
+"IP ünvanı təyin etmək",
+"Routerlər arasında marşrutları öyrənmək",
+"MAC ünvanını dəyişmək",
+"Faylları şifrələmək"
+],
+c:1,
+e:"OSPF dinamik routing protokoludur. Routerlər arasında marşrut məlumatlarını mübadilə edərək ən uyğun yolu müəyyənləşdirir."
+},
+{
+topic:"Network – SFP",
+q:"Fiber-optik şəbəkədə SFP modulunun vəzifəsi nədir?",
+a:[
+"Elektrik enerjisini artırmaq",
+"Optik və ya elektrik siqnallarının ötürülməsini təmin etmək",
+"IP ünvanı yaratmaq",
+"VLAN silmək"
+],
+c:1,
+e:"SFP modulu switch və digər şəbəkə cihazlarında optik və ya uyğun mis kabel bağlantısı yaratmaq üçün istifadə olunur."
+},
+{
+topic:"Network – 802.1Q",
+q:"802.1Q hansı texnologiya ilə əlaqəlidir?",
+a:[
+"VLAN Tagging",
+"DHCP",
+"DNS",
+"NAT"
+],
+c:0,
+e:"IEEE 802.1Q Ethernet frame-lərinə VLAN identifikatoru əlavə edərək VLAN məlumatının trunk bağlantılarında ötürülməsini təmin edir."
+},
+{
+topic:"Network – TCP",
+q:"TCP protokolunda 3-way handshake hansı ardıcıllıqla baş verir?",
+a:[
+"ACK – FIN – SYN",
+"SYN – SYN/ACK – ACK",
+"FIN – ACK – SYN",
+"SYN – FIN – ACK"
+],
+c:1,
+e:"TCP bağlantısı SYN, SYN/ACK və ACK mərhələləri ilə qurulur. Bu proses iki tərəfin əlaqəyə hazır olduğunu təsdiqləyir."
+},
+{
+topic:"System Administration – Active Directory",
+q:"Active Directory-də Domain Controller nə iş görür?",
+a:[
+"İstifadəçi və kompüterlərin autentifikasiyasını idarə edir",
+"İnternet sürətini artırır",
+"Diskləri formatlayır",
+"Router funksiyasını yerinə yetirir"
+],
+c:0,
+e:"Domain Controller Active Directory mühitində istifadəçilərin və kompüterlərin autentifikasiyasını, eləcə də domen siyasətlərini idarə edir."
+},
+{
+topic:"Linux – sudo",
+q:"Linux sistemində sudo əmri nə üçün istifadə olunur?",
+a:[
+"Faylı silmək",
+"Əmri yüksək səlahiyyətlə icra etmək",
+"IP ünvanını dəyişmək",
+"Sistemi formatlamaq"
+],
+c:1,
+e:"sudo istifadəçiyə müvafiq icazəsi olduqda əmri administrator və ya başqa istifadəçi səlahiyyəti ilə icra etməyə imkan verir."
+},
+{
+topic:"Cybersecurity – Brute Force",
+q:"Brute Force hücumu nədir?",
+a:[
+"Şəbəkəni fiziki söndürmək",
+"Çoxsaylı parol kombinasiyalarını yoxlamaq",
+"DNS serverini dəyişmək",
+"Firewall quraşdırmaq"
+],
+c:1,
+e:"Brute Force hücumunda təcavüzkar düzgün parolu tapmaq üçün çoxsaylı mümkün parol kombinasiyalarını avtomatik yoxlayır."
+},
+{
+topic:"Cybersecurity – SIEM",
+q:"SIEM sisteminin əsas məqsədi nədir?",
+a:[
+"Şəbəkə kabellərini yoxlamaq",
+"Təhlükəsizlik loglarını toplamaq və analiz etmək",
+"Kompüterin RAM-ını artırmaq",
+"IP ünvanı paylamaq"
+],
+c:1,
+e:"SIEM müxtəlif sistemlərdən təhlükəsizlik loglarını toplayır, əlaqələndirir və şübhəli hadisələrin aşkarlanmasına kömək edir."
+},
+{
+topic:"Network – Static Route",
+q:"Router üzərində Static Route nə üçün konfiqurasiya edilir?",
+a:[
+"Marşrutu əl ilə təyin etmək",
+"DHCP server yaratmaq",
+"MAC ünvanı dəyişmək",
+"Wi-Fi şifrəsini yeniləmək"
+],
+c:0,
+e:"Static Route administrator tərəfindən əl ilə təyin olunan marşrutdur. Router paketləri göstərilən istiqamətə yönləndirir."
+}
 ];
 
 let index=0,correct=0,wrong=0,locked=false,participantName='',lastResult=null;
