@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0b1220">
 <title>CyberX AZ | IT Quiz</title>
 <style>
-:root{--bg:#09111f;--panel:#111e31;--line:#2a405d;--text:#f1f6ff;--muted:#9fb0c8;--blue:#38a7ff}
+:root{--bg:#09111f;--panel:#111e31;--panel2:#172840;--line:#2a405d;--text:#f1f6ff;--muted:#9fb0c8;--blue:#38a7ff;--green:#29d391;--red:#ff667d}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 10% 0%,#173457 0,transparent 38%),linear-gradient(145deg,#080f1c,#101d30);color:var(--text);font-family:Inter,Arial,sans-serif;padding:24px 14px}
 .app{max-width:760px;margin:auto}
@@ -37,12 +37,15 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px
 .answers{display:grid;gap:10px}
 .answer{display:flex;align-items:center;gap:12px;text-align:left;width:100%;padding:15px;border:1px solid #354c68;background:#152740;color:#edf5ff;border-radius:13px;line-height:1.4}
 .answer:hover:not(:disabled){border-color:var(--blue);background:#1a3552}
+.answer.selected{border-color:var(--blue);background:#1c3b5c}
 .letter{flex:0 0 30px;height:30px;display:grid;place-items:center;border-radius:9px;background:#29425f;color:#c7e6ff;font-weight:900}
 .answer.correct{border-color:#229e70;background:#123a30}
 .answer.wrong{border-color:#c84f68;background:#401f2b}
 .answer:disabled{cursor:default}
 .feedback{margin-top:17px;padding:14px;border-radius:12px;background:#10372d;border:1px solid #23684f;color:#baf5d9;line-height:1.55;font-size:14px}
 .feedback.bad{background:#3b202a;border-color:#78384a;color:#ffd0da}
+.feedback p{margin:7px 0;color:inherit}
+.next{margin-top:18px}
 .score-ring{width:150px;height:150px;border-radius:50%;margin:22px auto;display:grid;place-items:center;background:conic-gradient(var(--blue) var(--score),#26364f 0);position:relative}
 .score-ring:before{content:"";position:absolute;inset:10px;border-radius:50%;background:#111e31}
 .score-inner{position:relative;text-align:center}
@@ -52,6 +55,7 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px
 .stat{background:#172840;border:1px solid #304761;border-radius:13px;padding:16px}
 .stat strong{display:block;font-size:28px}
 .stat small{color:var(--muted)}
+.notice{padding:12px 14px;border-radius:10px;background:#302b1b;border:1px solid #68562b;color:#f5dfa0;font-size:13px;line-height:1.5;margin-top:14px}
 .adminlink{display:block;text-align:center;margin-top:22px;color:#8ca7c5;font-size:12px;text-decoration:underline;cursor:pointer}
 .admin-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px}
 .admin-table th,.admin-table td{padding:10px 8px;border-bottom:1px solid #30445e;text-align:left}
@@ -59,12 +63,18 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px
 .tablewrap{overflow:auto}
 .admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 .admin-actions button{flex:1}
-.status{font-size:12px;color:#a9bed7;margin-top:12px;min-height:18px;overflow-wrap:anywhere}
-@media(max-width:480px){body{padding:14px 9px}.card{border-radius:16px}.tag{font-size:9px}.admin-table{font-size:12px}}
+.status{font-size:12px;color:#a9bed7;margin-top:12px;min-height:18px}
+@media(max-width:480px){
+body{padding:14px 9px}
+.card{border-radius:16px}
+.tag{font-size:9px}
+.admin-table{font-size:12px}
+}
 </style>
 </head>
 <body>
 <main class="app">
+
 <header>
 <div class="brand">Cyber<span>X</span> AZ</div>
 <div class="tag">IT KNOWLEDGE TEST</div>
@@ -95,9 +105,11 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px
 <div class="track"><div class="fill" id="fill"></div></div>
 <div class="eyebrow" id="topic"></div>
 <h2 id="question"></h2>
+<div id="multiNotice" class="status hidden">Bir neçə düzgün cavab var. Hamısını seçib təsdiqlə.</div>
 <div class="answers" id="answers"></div>
 <div id="feedback" class="hidden"></div>
-<button class="primary hidden" id="nextBtn">NÖVBƏTİ SUAL →</button>
+<button class="primary hidden" id="checkBtn">CAVABI TƏSDİQLƏ ✓</button>
+<button class="primary next hidden" id="nextBtn">NÖVBƏTİ SUAL →</button>
 </section>
 
 <section class="card hidden" id="result">
@@ -140,293 +152,589 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px
 <div class="status" id="adminStatus"></div>
 <div class="tablewrap">
 <table class="admin-table">
-<thead><tr><th>Ad</th><th>Bal</th><th>Düzgün</th><th>Səhv</th><th>Tarix</th></tr></thead>
+<thead>
+<tr><th>Ad</th><th>Bal</th><th>Düzgün</th><th>Səhv</th><th>Tarix</th></tr>
+</thead>
 <tbody id="resultsBody"></tbody>
 </table>
 </div>
 </div>
 <button class="secondary" id="backBtn" style="width:100%;margin-top:18px">Geri qayıt</button>
 </section>
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+
+// SUPABASE BAĞLANTISI
 const SUPABASE_URL = "https://chkatxaiuaaynhdkzvsd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_4Z4mDmXQ8j5VkoN8nfvotg_SQXwqQsj";
 
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseReady =
+SUPABASE_URL.startsWith('https://') &&
+!SUPABASE_URL.includes('YOUR_') &&
+!SUPABASE_ANON_KEY.includes('YOUR_');
+
+const db = supabaseReady
+? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)
+: null;
+
+
+// YENİ 10 SUAL
+// type: single = bir cavab
+// type: multi = bir neçə cavab
+// type: tf = doğru / yanlış
 
 const questions = [
+
 {
-topic:"Network – VLAN",
-q:"VLAN nə üçün istifadə olunur?",
+topic:"Help Desk / IP ünvanları",
+type:"single",
+q:"Windows kompüterində IP ünvanı 169.254.12.25 olaraq görünür. Bu vəziyyət ən çox nəyi göstərir?",
 a:[
-"Şəbəkəni məntiqi hissələrə bölmək",
-"İnternet sürətini artırmaq",
-"Kompüteri söndürmək",
-"DNS ünvanını dəyişmək"
+"Kompüter DHCP serverindən IP ala bilməyib",
+"DNS serveri cavab vermir",
+"Default Gateway düzgün deyil",
+"Şəbəkə kartı 1 Gbps dəstəkləmir"
 ],
-c:0,
-e:"VLAN bir fiziki şəbəkəni bir neçə məntiqi şəbəkəyə bölməyə imkan verir. Bu, şəbəkənin idarə edilməsini və təhlükəsizliyini yaxşılaşdırır."
+c:[0],
+e:[
+"169.254.x.x ünvanı Windows-un DHCP vasitəsilə ünvan ala bilmədikdə istifadə etdiyi APIPA ünvanıdır.",
+"DNS problemi adətən IP ünvanının 169.254.x.x olmasına səbəb olmur.",
+"Gateway problemi internetə çıxışı poza bilər, amma bu ünvanın yaranmasının əsas səbəbi deyil.",
+"Şəbəkə sürətinin IP ünvanının bu formada olmasına aidiyyəti yoxdur."
+]
 },
+
 {
-topic:"Network – OSPF",
-q:"OSPF protokolunun əsas funksiyası nədir?",
+topic:"Network Administration / DNS",
+type:"single",
+q:"İstifadəçi IP ünvanı ilə serverə qoşula bilir, amma serverin domen adını yazdıqda qoşula bilmir. İlk növbədə hansı xidməti yoxlamaq lazımdır?",
 a:[
-"IP ünvanı təyin etmək",
-"Routerlər arasında marşrutları öyrənmək",
-"MAC ünvanını dəyişmək",
-"Faylları şifrələmək"
-],
-c:1,
-e:"OSPF dinamik routing protokoludur. Routerlər arasında marşrut məlumatlarını mübadilə edərək ən uyğun yolu müəyyənləşdirir."
-},
-{
-topic:"Network – SFP",
-q:"Fiber-optik şəbəkədə SFP modulunun vəzifəsi nədir?",
-a:[
-"Elektrik enerjisini artırmaq",
-"Optik və ya elektrik siqnallarının ötürülməsini təmin etmək",
-"IP ünvanı yaratmaq",
-"VLAN silmək"
-],
-c:1,
-e:"SFP modulu switch və digər şəbəkə cihazlarında optik və ya uyğun mis kabel bağlantısı yaratmaq üçün istifadə olunur."
-},
-{
-topic:"Network – 802.1Q",
-q:"802.1Q hansı texnologiya ilə əlaqəlidir?",
-a:[
-"VLAN Tagging",
 "DHCP",
 "DNS",
-"NAT"
+"NTP",
+"SNMP"
 ],
-c:0,
-e:"IEEE 802.1Q Ethernet frame-lərinə VLAN identifikatoru əlavə edərək VLAN məlumatının trunk bağlantılarında ötürülməsini təmin edir."
+c:[1],
+e:[
+"DHCP avtomatik IP konfiqurasiyasını təmin edir; IP ilə bağlantı artıq mümkündür.",
+"DNS domen adlarını IP ünvanlarına çevirir. Domenlə bağlantı problemi bu xidməti yoxlamağı tələb edir.",
+"NTP sistem saatlarını sinxronlaşdırır, domen adlarını həll etmir.",
+"SNMP şəbəkə avadanlıqlarının monitorinqi üçün istifadə olunur."
+]
 },
+
 {
-topic:"Network – TCP",
-q:"TCP protokolunda 3-way handshake hansı ardıcıllıqla baş verir?",
+topic:"System Administration / Active Directory",
+type:"single",
+q:"Active Directory mühitində istifadəçinin kompüterə domen hesabı ilə daxil olması üçün hansı server rolu əsasdır?",
 a:[
-"ACK – FIN – SYN",
-"SYN – SYN/ACK – ACK",
-"FIN – ACK – SYN",
-"SYN – FIN – ACK"
+"File Server",
+"Print Server",
+"Domain Controller",
+"Web Server"
 ],
-c:1,
-e:"TCP bağlantısı SYN, SYN/ACK və ACK mərhələləri ilə qurulur. Bu proses iki tərəfin əlaqəyə hazır olduğunu təsdiqləyir."
+c:[2],
+e:[
+"File Server fayl paylaşımını təmin edir, domen autentifikasiyasının əsas xidməti deyil.",
+"Print Server printerlərin idarə edilməsinə xidmət edir.",
+"Domain Controller Active Directory autentifikasiyasını və domen xidmətlərini təmin edir.",
+"Web Server veb məzmun təqdim edir, domen girişini idarə etmir."
+]
 },
+
 {
-topic:"System Administration – Active Directory",
-q:"Active Directory-də Domain Controller nə iş görür?",
+topic:"Virtualization / VirtualBox",
+type:"single",
+q:"VirtualBox-da yaradılmış virtual maşın Host-Only şəbəkə rejimində işləyir. Bu rejimin əsas xüsusiyyəti hansıdır?",
 a:[
-"İstifadəçi və kompüterlərin autentifikasiyasını idarə edir",
-"İnternet sürətini artırır",
-"Diskləri formatlayır",
-"Router funksiyasını yerinə yetirir"
+"VM yalnız host kompüterlə və eyni Host-Only şəbəkədəki VM-lərlə əlaqə yarada bilər",
+"VM avtomatik olaraq internetə NAT vasitəsilə çıxır",
+"VM fiziki LAN-da ayrıca kompüter kimi görünür",
+"VM yalnız digər fiziki kompüterlərlə əlaqə yaradır"
 ],
-c:0,
-e:"Domain Controller Active Directory mühitində istifadəçilərin və kompüterlərin autentifikasiyasını, eləcə də domen siyasətlərini idarə edir."
+c:[0],
+e:[
+"Host-Only host və həmin virtual şəbəkədəki maşınlar arasında əlaqə yaradır; standart halda xarici şəbəkəyə çıxış vermir.",
+"Bu, NAT rejiminin xüsusiyyətidir, Host-Only rejiminin deyil.",
+"Bu xüsusiyyət Bridged rejiminə aiddir.",
+"Host-Only rejimi host kompüterlə əlaqəni dəstəkləyir."
+]
 },
+
 {
-topic:"Linux – sudo",
-q:"Linux sistemində sudo əmri nə üçün istifadə olunur?",
+topic:"Cybersecurity / Phishing",
+type:"single",
+q:"Bir istifadəçi şübhəli e-mail vasitəsilə daxil olduğu saxta saytda korporativ parolunu yazıb. Bu hücumun adı nədir?",
 a:[
-"Faylı silmək",
-"Əmri yüksək səlahiyyətlə icra etmək",
-"IP ünvanını dəyişmək",
-"Sistemi formatlamaq"
+"Brute Force",
+"Phishing",
+"DDoS",
+"Port Scanning"
 ],
-c:1,
-e:"sudo istifadəçiyə müvafiq icazəsi olduqda əmri administrator və ya başqa istifadəçi səlahiyyəti ilə icra etməyə imkan verir."
+c:[1],
+e:[
+"Brute Force parol kombinasiyalarının çoxsaylı sınaqlarla yoxlanmasıdır.",
+"Phishing saxta mesaj və saytlarla istifadəçinin məxfi məlumatlarını ələ keçirməyə çalışır.",
+"DDoS xidmətin əlçatanlığını pozmaq üçün çoxsaylı sorğular göndərir.",
+"Port Scanning sistemdə açıq portları müəyyənləşdirmək üçün aparılır."
+]
 },
+
 {
-topic:"Cybersecurity – Brute Force",
-q:"Brute Force hücumu nədir?",
+topic:"Help Desk / Network Troubleshooting",
+type:"multi",
+q:"Windows kompüterində istifadəçi internetə qoşula bilmir. Hansı komandalar şəbəkə probleminin diaqnostikasında faydalıdır? Bütün düzgün cavabları seçin.",
 a:[
-"Şəbəkəni fiziki söndürmək",
-"Çoxsaylı parol kombinasiyalarını yoxlamaq",
-"DNS serverini dəyişmək",
-"Firewall quraşdırmaq"
+"ipconfig /all",
+"nslookup",
+"ping",
+"format"
 ],
-c:1,
-e:"Brute Force hücumunda təcavüzkar düzgün parolu tapmaq üçün çoxsaylı mümkün parol kombinasiyalarını avtomatik yoxlayır."
+c:[0,1,2],
+e:[
+"Şəbəkə adapterlərinin IP, Gateway, DNS və DHCP məlumatlarını göstərir.",
+"DNS sorğularını yoxlamağa və domen adının hansı IP-yə çevrildiyini müəyyən etməyə kömək edir.",
+"Şəbəkə ünvanına ICMP sorğuları göndərərək əlçatanlığı yoxlamağa kömək edir.",
+"Disk və ya bölməni formatlamaq üçündür, şəbəkə diaqnostikası komandası deyil."
+]
 },
+
 {
-topic:"Cybersecurity – SIEM",
-q:"SIEM sisteminin əsas məqsədi nədir?",
-a:[
-"Şəbəkə kabellərini yoxlamaq",
-"Təhlükəsizlik loglarını toplamaq və analiz etmək",
-"Kompüterin RAM-ını artırmaq",
-"IP ünvanı paylamaq"
-],
-c:1,
-e:"SIEM müxtəlif sistemlərdən təhlükəsizlik loglarını toplayır, əlaqələndirir və şübhəli hadisələrin aşkarlanmasına kömək edir."
+topic:"Virtualization / Hypervisor",
+type:"tf",
+q:"Hypervisor Type 1 birbaşa fiziki avadanlıq üzərində işləyir və ayrıca host əməliyyat sisteminə ehtiyac duymur.",
+a:["Doğru","Yanlış"],
+c:[0],
+e:[
+"Type 1 Hypervisor birbaşa fiziki avadanlıq üzərində işləyir (bare-metal arxitektura).",
+"Bu xüsusiyyət Type 1 Hypervisor üçün doğrudur; Type 2 isə host əməliyyat sistemi üzərində işləyir."
+]
 },
+
 {
-topic:"Network – Static Route",
-q:"Router üzərində Static Route nə üçün konfiqurasiya edilir?",
+topic:"System Administration / Linux",
+type:"single",
+q:"Linux sistemində hazırkı qovluqdakı fayl və qovluqların siyahısını göstərmək üçün hansı komanda istifadə olunur?",
 a:[
-"Marşrutu əl ilə təyin etmək",
-"DHCP server yaratmaq",
-"MAC ünvanı dəyişmək",
-"Wi-Fi şifrəsini yeniləmək"
+"pwd",
+"cd",
+"ls",
+"mkdir"
 ],
-c:0,
-e:"Static Route administrator tərəfindən əl ilə təyin olunan marşrutdur. Router paketləri göstərilən istiqamətə yönləndirir."
+c:[2],
+e:[
+"pwd cari iş qovluğunun yolunu göstərir.",
+"cd qovluqlar arasında keçid etmək üçündür.",
+"ls cari qovluqdakı fayl və qovluqları siyahı şəklində göstərir.",
+"mkdir yeni qovluq yaratmaq üçündür."
+]
+},
+
+{
+topic:"Network Administration / VLAN",
+type:"tf",
+q:"VLAN vasitəsilə eyni fiziki switch üzərindəki portlar fərqli Layer 2 broadcast domain-lərə ayrıla bilər.",
+a:["Doğru","Yanlış"],
+c:[0],
+e:[
+"VLAN eyni fiziki switch daxilində ayrı Layer 2 broadcast domain-lər yaradır.",
+"VLAN məhz fiziki switch üzərində məntiqi Layer 2 şəbəkə seqmentləri yaratmağa imkan verir."
+]
+},
+
+{
+topic:"System Administration / Group Policy",
+type:"single",
+q:"Windows Server-də Group Policy əsasən hansı məqsədlə istifadə olunur?",
+a:[
+"Şəbəkə kabellərinin test edilməsi",
+"İstifadəçi və kompüterlərə mərkəzləşdirilmiş siyasətlərin tətbiqi",
+"Virtual disklərin fiziki ölçüsünün artırılması",
+"DNS sorğularının şifrələnməsi"
+],
+c:[1],
+e:[
+"Kabel testləri fiziki şəbəkə diaqnostikası vasitəsilə aparılır.",
+"Group Policy domen mühitində təhlükəsizlik, sistem və istifadəçi parametrlərini mərkəzləşdirilmiş idarə etməyə imkan verir.",
+"Virtual disk ölçüsü Hypervisor və disk idarəetmə vasitələri ilə dəyişdirilir.",
+"Group Policy DNS sorğularını birbaşa şifrələyən xidmət deyil."
+]
 }
+
 ];
 
-let index=0,correct=0,wrong=0,locked=false,participantName='',lastResult=null;
+
+// TEST MƏNTİQİ
+
+let index=0;
+let correct=0;
+let wrong=0;
+let locked=false;
+let selected=[];
+let participantName='';
+let lastResult=null;
+
 const $=id=>document.getElementById(id);
 
 function show(id){
-['start','quiz','result','admin'].forEach(x=>$(x).classList.toggle('hidden',x!==id));
+['start','quiz','result','admin'].forEach(x=>{
+$(x).classList.toggle('hidden',x!==id);
+});
 }
 
 function begin(){
+
 participantName=$('participant').value.trim();
+
 if(participantName.length<2){
 $('startNotice').textContent='Zəhmət olmasa adını daxil et.';
 return;
 }
+
 $('startNotice').textContent='';
-index=0;correct=0;wrong=0;
+index=0;
+correct=0;
+wrong=0;
 show('quiz');
 render();
+
 }
 
 function render(){
+
 locked=false;
+selected=[];
+
 const q=questions[index];
+
 $('count').textContent=`Sual ${index+1} / ${questions.length}`;
 $('percent').textContent=`${Math.round((index+1)/questions.length*100)}%`;
 $('fill').style.width=`${(index+1)/questions.length*100}%`;
+
 $('topic').textContent=q.topic;
 $('question').textContent=q.q;
+
 $('feedback').className='hidden';
-$('feedback').textContent='';
+$('feedback').innerHTML='';
+
 $('nextBtn').classList.add('hidden');
+$('checkBtn').classList.add('hidden');
+
+$('multiNotice').classList.toggle('hidden',q.type!=='multi');
+
 $('answers').innerHTML='';
 
 q.a.forEach((answer,i)=>{
+
 const b=document.createElement('button');
 b.className='answer';
+
 const letter=document.createElement('span');
 letter.className='letter';
-letter.textContent=String.fromCharCode(65+i);
+letter.textContent=q.type==='tf'
+? (i===0?'✓':'✕')
+: String.fromCharCode(65+i);
+
 const t=document.createElement('span');
 t.textContent=answer;
+
 b.append(letter,t);
-b.addEventListener('click',()=>choose(i,b));
-$('answers').append(b);
-});
+
+b.addEventListener('click',()=>{
+
+if(q.type==='multi'){
+toggleChoice(i,b);
+}else{
+choose([i],b);
 }
 
-function choose(choice,button){
-if(locked)return;
-locked=true;
-const q=questions[index];
-[...$('answers').children].forEach((b,i)=>{
-b.disabled=true;
-if(i===q.c)b.classList.add('correct');
 });
-const fb=$('feedback');
-if(choice===q.c){
+
+$('answers').append(b);
+
+});
+
+}
+
+
+function toggleChoice(i,button){
+
+if(locked)return;
+
+if(selected.includes(i)){
+selected=selected.filter(x=>x!==i);
+button.classList.remove('selected');
+}else{
+selected.push(i);
+button.classList.add('selected');
+}
+
+$('checkBtn').classList.toggle('hidden',selected.length===0);
+
+}
+
+
+function choose(values,button){
+
+if(locked)return;
+
+selected=values;
+evaluateAnswer();
+
+}
+
+
+function checkMulti(){
+
+if(locked || selected.length===0)return;
+
+evaluateAnswer();
+
+}
+
+
+function evaluateAnswer(){
+
+locked=true;
+
+const q=questions[index];
+
+const isCorrect=
+selected.length===q.c.length &&
+q.c.every(x=>selected.includes(x));
+
+if(isCorrect){
 correct++;
-fb.textContent='✓ Düzgün cavab! '+q.e;
-fb.className='feedback';
 }else{
 wrong++;
-button.classList.add('wrong');
-fb.textContent='✕ Səhv cavab. Düzgün cavab: '+q.a[q.c]+'. '+q.e;
-fb.className='feedback bad';
-}
-$('nextBtn').textContent=index===questions.length-1?'NƏTİCƏYƏ BAX →':'NÖVBƏTİ SUAL →';
-$('nextBtn').classList.remove('hidden');
 }
 
+const buttons=[...$('answers').children];
+
+buttons.forEach((b,i)=>{
+
+b.disabled=true;
+
+if(q.c.includes(i)){
+b.classList.add('correct');
+}
+
+if(selected.includes(i) && !q.c.includes(i)){
+b.classList.add('wrong');
+}
+
+});
+
+const fb=$('feedback');
+
+if(q.type==='multi'){
+
+let html=isCorrect
+? '✓ Bütün düzgün cavabları seçdin!'
+: '✕ Cavab tam düzgün deyil. Düzgün cavabların izahı:';
+
+q.a.forEach((answer,i)=>{
+
+html+=`<p><b>${String.fromCharCode(65+i)}. ${answer}</b> — ${q.e[i]}</p>`;
+
+});
+
+fb.innerHTML=html;
+
+}else{
+
+const chosen=selected[0];
+
+if(isCorrect){
+
+fb.textContent='✓ Düzgün cavab! '+q.e[chosen];
+
+}else{
+
+fb.textContent='✕ Səhv cavab. Düzgün cavab: '+
+q.c.map(i=>q.a[i]).join(', ')+'. '+
+q.e[chosen];
+
+}
+
+}
+
+fb.className=isCorrect?'feedback':'feedback bad';
+
+$('checkBtn').classList.add('hidden');
+
+$('nextBtn').textContent=
+index===questions.length-1
+?'NƏTİCƏYƏ BAX →'
+:'NÖVBƏTİ SUAL →';
+
+$('nextBtn').classList.remove('hidden');
+
+}
+
+
+// NƏTİCƏ VƏ SUPABASE
+
 async function finish(){
+
 show('result');
+
 const score=correct*10;
+
 $('score').textContent=score;
 $('correct').textContent=correct;
 $('wrong').textContent=wrong;
+
 $('ring').style.setProperty('--score',score+'%');
 
 let title='Davam et, bacaracaqsan!';
 let msg='Hər test yeni bilik qazanmaq üçün fürsətdir.';
-if(score===100){title='Möhtəşəm nəticə! 🏆';msg='10 sualın hamısına düzgün cavab verdin. Əhsən!';}
-else if(score>=70){title='Çox yaxşı! 🔥';msg='IT biliklərin yaxşı səviyyədədir. Belə davam et!';}
-else if(score>=40){title='Yaxşı başlanğıcdır! 💪';msg='Əsasları bilirsən. Bir az da məşq etsən, nəticən artacaq.';}
+
+if(score===100){
+title='Möhtəşəm nəticə! 🏆';
+msg='10 sualın hamısına düzgün cavab verdin. Əhsən!';
+}else if(score>=70){
+title='Çox yaxşı! 🔥';
+msg='IT biliklərin yaxşı səviyyədədir. Belə davam et!';
+}else if(score>=40){
+title='Yaxşı başlanğıcdır! 💪';
+msg='Əsasları bilirsən. Bir az da məşq etsən, nəticən artacaq.';
+}
 
 $('resultTitle').textContent=title;
-$('resultText').textContent=`${questions.length} sualı tamamladın. Nəticən: ${score} bal.`;
+
+$('resultText').textContent=
+`${questions.length} sualı tamamladın. Nəticən: ${score} bal.`;
+
 $('message').textContent=msg;
 
 lastResult={
 participant_name:participantName,
-score:score,
+score,
 correct_answers:correct,
 wrong_answers:wrong,
 total_questions:questions.length,
-answers:questions.map(q=>({question:q.q,correct_answer:q.a[q.c]}))
+answers:questions.map(q=>({
+question:q.q,
+selected_answers:selectedLabels(q),
+correct_answer:q.c.map(i=>q.a[i]).join(', ')
+}))
 };
 
-$('saveStatus').textContent='Nəticə yadda saxlanılır...';
+$('saveStatus').textContent='';
 
-try{
-const {data,error}=await db
-.from('quiz_results')
-.insert(lastResult)
-.select();
+if(!db){
 
-if(error){
-console.error('Supabase error:',error);
-$('saveStatus').textContent='XƏTA: '+error.message+' | Kod: '+error.code+' | Detal: '+(error.details||'')+' | İpucu: '+(error.hint||'');
-}else{
-$('saveStatus').textContent='✓ Nəticən uğurla yadda saxlanıldı.';
+$('saveStatus').textContent=
+'Test bitdi. Nəticə hazırda onlayn bazaya yazılmır; Supabase bağlantısı tamamlanmalıdır.';
+
+return;
+
 }
-}catch(err){
-console.error(err);
-$('saveStatus').textContent='XƏTA: '+err.message;
+
+const {error}=await db.from('quiz_results').insert(lastResult);
+
+$('saveStatus').textContent=error
+?'Nəticə bazaya yazılmadı. Admin Supabase cədvəl/RLS sazlamasını yoxlamalıdır.'
+:'✓ Nəticən uğurla yadda saxlanıldı.';
+
 }
+
+
+function selectedLabels(q){
+
+return q._selected
+? q._selected.map(i=>q.a[i])
+: [];
+
 }
+
+
+// EVENT-LƏR
 
 $('startBtn').addEventListener('click',begin);
 
+$('checkBtn').addEventListener('click',checkMulti);
+
 $('nextBtn').addEventListener('click',()=>{
-if(index<questions.length-1){index++;render();}
-else{finish();}
+
+if(index<questions.length-1){
+
+// İştirakçının cavablarını saxla
+questions[index]._selected=[...selected];
+
+index++;
+render();
+
+}else{
+
+questions[index]._selected=[...selected];
+finish();
+
+}
+
 });
 
 $('restartBtn').addEventListener('click',()=>{
+
 $('participant').value=participantName;
+show('start');
+
+});
+
+$('adminOpen').addEventListener('click',()=>{
+show('admin');
+});
+
+$('backBtn').addEventListener('click',()=>{
 show('start');
 });
 
-$('adminOpen').addEventListener('click',()=>show('admin'));
-$('backBtn').addEventListener('click',()=>show('start'));
+
+// ADMIN GİRİŞİ
 
 $('loginBtn').addEventListener('click',async()=>{
-$('adminStatus').textContent='Giriş yoxlanılır...';
+
+if(!db){
+
+$('adminStatus').textContent=
+'Əvvəl Supabase URL və publishable/anon key əlavə edilməlidir.';
+
+return;
+
+}
+
 const {error}=await db.auth.signInWithPassword({
 email:$('adminEmail').value.trim(),
 password:$('adminPassword').value
 });
+
 if(error){
+
 $('adminStatus').textContent='Giriş alınmadı: '+error.message;
 return;
+
 }
+
 $('adminLogin').classList.add('hidden');
 $('adminData').classList.remove('hidden');
+
 loadResults();
+
 });
 
+
+// ADMIN NƏTİCƏLƏRİ
+
 async function loadResults(){
+
+if(!db)return;
+
 $('adminStatus').textContent='Nəticələr yüklənir...';
+
 const {data,error}=await db
 .from('quiz_results')
 .select('id,participant_name,score,correct_answers,wrong_answers,created_at')
@@ -434,48 +742,96 @@ const {data,error}=await db
 .limit(500);
 
 if(error){
+
 $('adminStatus').textContent='Məlumat alınmadı: '+error.message;
 return;
+
 }
 
 window.quizAdminRows=data||[];
+
 $('resultsBody').innerHTML='';
+
 window.quizAdminRows.forEach(r=>{
+
 const tr=document.createElement('tr');
-[r.participant_name,r.score,r.correct_answers,r.wrong_answers,new Date(r.created_at).toLocaleString('az-AZ')].forEach(v=>{
+
+[
+r.participant_name,
+r.score,
+r.correct_answers,
+r.wrong_answers,
+new Date(r.created_at).toLocaleString('az-AZ')
+].forEach(v=>{
+
 const td=document.createElement('td');
 td.textContent=v??'';
 tr.append(td);
+
 });
+
 $('resultsBody').append(tr);
+
 });
-$('adminStatus').textContent=`Cəmi ${window.quizAdminRows.length} nəticə göstərilir.`;
+
+$('adminStatus').textContent=
+`Cəmi ${window.quizAdminRows.length} nəticə göstərilir.`;
+
 }
 
 $('refreshBtn').addEventListener('click',loadResults);
 
+
+// ADMIN ÇIXIŞ
+
 $('logoutBtn').addEventListener('click',async()=>{
-await db.auth.signOut();
+
+await db?.auth.signOut();
+
 $('adminData').classList.add('hidden');
 $('adminLogin').classList.remove('hidden');
+
 $('adminStatus').textContent='Sessiyadan çıxıldı.';
+
 });
 
+
+// CSV YÜKLƏMƏ
+
 $('csvBtn').addEventListener('click',()=>{
+
 const rows=window.quizAdminRows||[];
+
 const csv=[
 'Ad,Bal,Duzgun,Səhv,Tarix',
-...rows.map(r=>[
-r.participant_name,r.score,r.correct_answers,r.wrong_answers,r.created_at
-].map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(','))
+...rows.map(r=>
+[
+r.participant_name,
+r.score,
+r.correct_answers,
+r.wrong_answers,
+r.created_at
+].map(v=>
+'"'+String(v??'').replaceAll('"','""')+'"'
+).join(',')
+)
 ].join('\n');
-const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+
+const blob=new Blob(
+['\ufeff'+csv],
+{type:'text/csv;charset=utf-8'}
+);
+
 const a=document.createElement('a');
+
 a.href=URL.createObjectURL(blob);
 a.download='cyberx-az-quiz-results.csv';
 a.click();
+
 URL.revokeObjectURL(a.href);
+
 });
+
 </script>
 </body>
 </html>
