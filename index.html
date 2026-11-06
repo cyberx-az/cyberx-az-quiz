@@ -116,7 +116,7 @@ body{padding:14px 9px}
 <div class="answers" id="answers"></div>
 <div id="feedback" class="hidden"></div>
 <button class="primary hidden" id="checkBtn">CAVABI TƏSDİQLƏ ✓</button>
-<button class="primary next hidden" id="nextBtn">NÖVBƏTİ SUAL →</button>
+<div style="display:flex;gap:10px;margin-top:12px"><button class="secondary hidden" id="prevBtn" style="flex:1">← ƏVVƏLKİ SUAL</button><button class="primary next hidden" id="nextBtn" style="flex:1">NÖVBƏTİ SUAL →</button></div>
 </section>
 <section class="card hidden" id="result">
 <div class="eyebrow">Test tamamlandı</div>
@@ -417,23 +417,47 @@ function beginQuiz(qz){
   show('quiz'); render();
 }
 function render(){
-  locked=false; selected=[];
   const q=activeQuestions[index];
+  locked=!!q._evaluated; selected=q._selected?[...q._selected]:[];
   $('count').textContent=`Sual ${index+1} / ${activeQuestions.length}`;
   $('percent').textContent=`${Math.round((index+1)/activeQuestions.length*100)}%`;
   $('fill').style.width=`${(index+1)/activeQuestions.length*100}%`;
   $('topic').textContent=q.topic; $('question').textContent=q.q;
   $('feedback').className='hidden'; $('feedback').innerHTML='';
-  $('nextBtn').classList.add('hidden'); $('checkBtn').classList.add('hidden');
-  $('multiNotice').classList.toggle('hidden',q.type!=='multi'); $('answers').innerHTML='';
+  $('nextBtn').classList.toggle('hidden',!q._evaluated);
+  $('prevBtn').classList.toggle('hidden',index===0);
+  $('checkBtn').classList.add('hidden');
+  $('multiNotice').classList.toggle('hidden',q.type!=='multi'||q._evaluated); $('answers').innerHTML='';
   q.a.forEach((answer,i)=>{
     const b=document.createElement('button'); b.className='answer';
     const letter=document.createElement('span'); letter.className='letter';
     letter.textContent=q.type==='tf'?(i===0?'✓':'✕'):String.fromCharCode(65+i);
     const t=document.createElement('span'); t.textContent=answer; b.append(letter,t);
-    b.addEventListener('click',()=>q.type==='multi'?toggleChoice(i,b):choose([i]));
+    if(q._evaluated){
+      b.disabled=true;
+      if(q.c.includes(i))b.classList.add('correct');
+      if(selected.includes(i)&&!q.c.includes(i))b.classList.add('wrong');
+      b.classList.toggle('selected',selected.includes(i));
+    }else{
+      b.classList.toggle('selected',selected.includes(i));
+      b.addEventListener('click',()=>q.type==='multi'?toggleChoice(i,b):choose([i]));
+    }
     $('answers').append(b);
   });
+  if(q._evaluated){
+    const fb=$('feedback');
+    if(q.type==='multi'){
+      let html=q._correct?'✓ Bütün düzgün cavabları seçdin!':'✕ Cavab tam düzgün deyil. Düzgün cavabların izahı:';
+      q.a.forEach((answer,i)=>{html+=`<p><b>${String.fromCharCode(65+i)}. ${answer}</b> — ${q.e[i]}</p>`;}); fb.innerHTML=html;
+    }else{
+      const chosen=selected[0];
+      fb.textContent=q._correct?'✓ Düzgün cavab! '+q.e[chosen]:'✕ Səhv cavab. Düzgün cavab: '+q.c.map(i=>q.a[i]).join(', ')+'. '+q.e[chosen];
+    }
+    fb.className=q._correct?'feedback':'feedback bad';
+    $('nextBtn').textContent=index===activeQuestions.length-1?'NƏTİCƏYƏ BAX →':'NÖVBƏTİ SUAL →';
+  }else if(q.type==='multi'){
+    $('checkBtn').classList.toggle('hidden',selected.length===0);
+  }
 }
 function toggleChoice(i,button){
   if(locked)return;
@@ -444,22 +468,12 @@ function toggleChoice(i,button){
 function choose(values){if(locked)return;selected=values;evaluateAnswer();}
 function checkMulti(){if(!locked&&selected.length)evaluateAnswer();}
 function evaluateAnswer(){
+  if(locked)return;
   locked=true; const q=activeQuestions[index];
   const isCorrect=selected.length===q.c.length&&q.c.every(x=>selected.includes(x));
+  q._selected=[...selected]; q._evaluated=true; q._correct=isCorrect;
   if(isCorrect)correct++;else wrong++;
-  [...$('answers').children].forEach((b,i)=>{b.disabled=true;if(q.c.includes(i))b.classList.add('correct');if(selected.includes(i)&&!q.c.includes(i))b.classList.add('wrong');});
-  const fb=$('feedback');
-  if(q.type==='multi'){
-    let html=isCorrect?'✓ Bütün düzgün cavabları seçdin!':'✕ Cavab tam düzgün deyil. Düzgün cavabların izahı:';
-    q.a.forEach((answer,i)=>{html+=`<p><b>${String.fromCharCode(65+i)}. ${answer}</b> — ${q.e[i]}</p>`;}); fb.innerHTML=html;
-  }else{
-    const chosen=selected[0];
-    fb.textContent=isCorrect?'✓ Düzgün cavab! '+q.e[chosen]:'✕ Səhv cavab. Düzgün cavab: '+q.c.map(i=>q.a[i]).join(', ')+'. '+q.e[chosen];
-  }
-  fb.className=isCorrect?'feedback':'feedback bad';
-  $('checkBtn').classList.add('hidden');
-  $('nextBtn').textContent=index===activeQuestions.length-1?'NƏTİCƏYƏ BAX →':'NÖVBƏTİ SUAL →';
-  $('nextBtn').classList.remove('hidden');
+  render();
 }
 async function finish(){
   show('result'); const score=Math.round(correct/activeQuestions.length*100);
@@ -482,9 +496,9 @@ function selectedLabels(q){return q._selected?q._selected.map(i=>q.a[i]):[];}
 $('startBtn').addEventListener('click',begin);
 $('checkBtn').addEventListener('click',checkMulti);
 $('nextBtn').addEventListener('click',()=>{
-  activeQuestions[index]._selected=[...selected];
   if(index<activeQuestions.length-1){index++;render();}else finish();
 });
+$('prevBtn').addEventListener('click',()=>{if(index>0){index--;render();}});
 $('restartBtn').addEventListener('click',async()=>{$('participant').value=participantName;show('quizList');await loadPublicQuizzes();});
 $('adminOpen').addEventListener('click',()=>show('admin'));
 $('backBtn').addEventListener('click',()=>show('start'));
