@@ -88,10 +88,19 @@ body{padding:14px 9px}
 </div>
 <label class="field" for="participant">Adın və soyadın</label>
 <input id="participant" type="text" maxlength="80" placeholder="Məsələn: Əli Məmmədov" autocomplete="name">
-<button class="primary" id="startBtn">TESTƏ BAŞLA →</button>
+<button class="primary" id="startBtn">QUIZ-LƏRƏ BAX →</button>
 <div id="startNotice" class="status"></div>
 <div class="muted">CyberX AZ • Öyrən, sına, inkişaf et</div>
 <a class="adminlink" id="adminOpen">Admin paneli</a>
+</section>
+
+<section class="card hidden" id="quizList">
+  <div class="eyebrow">CyberX AZ • Quiz kataloqu</div>
+  <h1>Quiz seç</h1>
+  <p>İştirak etmək istədiyin testi seç. Əvvəlki Quiz-lər burada saxlanılır.</p>
+  <div id="quizCards" class="answers"></div>
+  <div id="quizListStatus" class="status"></div>
+  <button class="secondary" id="quizListBack" style="width:100%;margin-top:18px">Geri qayıt</button>
 </section>
 <section class="card hidden" id="quiz">
 <div class="progressrow">
@@ -138,6 +147,18 @@ body{padding:14px 9px}
 <button class="primary" id="loginBtn">DAXİL OL</button>
 </div>
 <div id="adminData" class="hidden">
+<div class="card" style="padding:16px;margin:14px 0;background:#0c192a">
+  <h2 style="margin-bottom:8px">Yeni Quiz yarat</h2>
+  <label class="field" for="newQuizTitle">Quiz-in adı</label>
+  <input id="newQuizTitle" type="text" maxlength="120" placeholder="Məsələn: Help Desk – Quiz 02">
+  <label class="field" for="newQuizDescription">Qısa təsvir</label>
+  <input id="newQuizDescription" type="text" maxlength="240" placeholder="10 sual • Orta səviyyə">
+  <label class="field" for="newQuizQuestions">Suallar (JSON formatında)</label>
+  <textarea id="newQuizQuestions" rows="10" style="width:100%;padding:13px;border:1px solid #3a506d;background:#0c192a;color:white;border-radius:11px;font:13px/1.5 monospace" placeholder='[{"topic":"Network","type":"single","q":"Sual?","a":["A","B","C","D"],"c":[0],"e":["İzah A","İzah B","İzah C","İzah D"]}]'></textarea>
+  <p style="font-size:12px;margin:8px 0">Format: type dəyərləri single, multi və ya tf; c düzgün cavabların indeksləridir (A=0, B=1, C=2, D=3).</p>
+  <button class="primary" id="createQuizBtn">QUIZ-İ YADDA SAXLA</button>
+  <div id="createQuizStatus" class="status"></div>
+</div>
 <div class="admin-actions">
 <button class="secondary" id="refreshBtn">Yenilə</button>
 <button class="secondary" id="csvBtn">CSV yüklə</button>
@@ -147,7 +168,7 @@ body{padding:14px 9px}
 <div class="tablewrap">
 <table class="admin-table">
 <thead>
-<tr><th>Ad</th><th>Bal</th><th>Düzgün</th><th>Səhv</th><th>Tarix</th></tr>
+<tr><th>Quiz</th><th>Ad</th><th>Bal</th><th>Düzgün</th><th>Səhv</th><th>Tarix</th></tr>
 </thead>
 <tbody id="resultsBody"></tbody>
 </table>
@@ -340,300 +361,358 @@ e:[
 ]
 }
 ];
-// TEST MƏNTİQİ
-let index=0;
-let correct=0;
-let wrong=0;
-let locked=false;
-let selected=[];
-let participantName='';
-let lastResult=null;
+// QUIZ MƏNTİQİ — suallar artıq Supabase-də ayrıca Quiz kimi saxlanılır.
+let index=0, correct=0, wrong=0, locked=false, selected=[];
+let participantName='', lastResult=null, activeQuiz=null, activeQuestions=[];
+let adminRows=[];
 const $=id=>document.getElementById(id);
-function show(id){
-['start','quiz','result','admin'].forEach(x=>{
-$(x).classList.toggle('hidden',x!==id);
-});
+function show(id){['start','quizList','quiz','result','admin'].forEach(x=>$(x).classList.toggle('hidden',x!==id));}
+function normalizeQuestion(q){
+  if(!q || !q.q || !Array.isArray(q.a) || !Array.isArray(q.c) || !Array.isArray(q.e)) throw new Error('Sual formatı düzgün deyil.');
+  if(q.a.length !== q.e.length) throw new Error('Hər cavab variantı üçün ayrıca izah olmalıdır.');
+  if(!['single','multi','tf'].includes(q.type)) throw new Error('Sual tipi single, multi və ya tf olmalıdır.');
+  if(q.type==='tf' && (q.a.length!==2 || q.c.length!==1)) throw new Error('Doğru/yanlış sualında 2 variant və 1 düzgün cavab olmalıdır.');
+  if(q.type==='single' && (q.a.length!==4 || q.c.length!==1)) throw new Error('Single sualda 4 variant və 1 düzgün cavab olmalıdır.');
+  if(q.type==='multi' && (q.a.length!==4 || q.c.length<2)) throw new Error('Multi sualda 4 variant və ən azı 2 düzgün cavab olmalıdır.');
+  if(q.c.some(n=>!Number.isInteger(n)||n<0||n>=q.a.length)) throw new Error('Düzgün cavab indekslərindən biri yanlışdır.');
+  return {...q,topic:q.topic||'IT Bilik Testi'};
 }
-function begin(){
-participantName=$('participant').value.trim();
-if(participantName.length<2){
-$('startNotice').textContent='Zəhmət olmasa adını daxil et.';
-return;
+async function loadPublicQuizzes(){
+  $('quizListStatus').textContent='Quiz-lər yüklənir...';
+  const {data,error}=await db.from('quizzes').select('id,title,description,questions,created_at').eq('is_active',true).order('created_at',{ascending:false});
+  if(error){$('quizListStatus').textContent='Quiz-lər yüklənmədi: '+error.message;return;}
+  const cards=$('quizCards'); cards.innerHTML='';
+  if(!data || !data.length){$('quizListStatus').textContent='Hələ aktiv Quiz yoxdur. Admin paneldən ilk Quiz-i əlavə et.';return;}
+  $('quizListStatus').textContent='';
+  data.forEach(qz=>{
+    const b=document.createElement('button'); b.className='answer'; b.style.display='block';
+    const title=document.createElement('strong'); title.textContent=qz.title;
+    const desc=document.createElement('div'); desc.style.cssText='color:#9fb0c8;font-size:13px;margin-top:6px'; desc.textContent=(qz.description||'IT bilik testi')+' • '+(Array.isArray(qz.questions)?qz.questions.length:0)+' sual';
+    b.append(title,desc); b.addEventListener('click',()=>beginQuiz(qz)); cards.append(b);
+  });
 }
-$('startNotice').textContent='';
-index=0;
-correct=0;
-wrong=0;
-show('quiz');
-render();
+async function begin(){
+  participantName=$('participant').value.trim();
+  if(participantName.length<2){$('startNotice').textContent='Zəhmət olmasa adını daxil et.';return;}
+  $('startNotice').textContent='';
+  if(!db){$('startNotice').textContent='Supabase bağlantısı qurulmayıb.';return;}
+  show('quizList'); await loadPublicQuizzes();
+}
+function beginQuiz(qz){
+  try{activeQuestions=qz.questions.map(normalizeQuestion);}
+  catch(err){$('quizListStatus').textContent='Bu Quiz-də sual formatı xətalıdır: '+err.message;return;}
+  if(!activeQuestions.length){$('quizListStatus').textContent='Bu Quiz-də sual yoxdur.';return;}
+  activeQuiz=qz; index=0; correct=0; wrong=0;
+  activeQuestions.forEach(q=>delete q._selected);
+  show('quiz'); render();
 }
 function render(){
-locked=false;
-selected=[];
-const q=questions[index];
-$('count').textContent=`Sual ${index+1} / ${questions.length}`;
-$('percent').textContent=`${Math.round((index+1)/questions.length*100)}%`;
-$('fill').style.width=`${(index+1)/questions.length*100}%`;
-$('topic').textContent=q.topic;
-$('question').textContent=q.q;
-$('feedback').className='hidden';
-$('feedback').innerHTML='';
-$('nextBtn').classList.add('hidden');
-$('checkBtn').classList.add('hidden');
-$('multiNotice').classList.toggle('hidden',q.type!=='multi');
-$('answers').innerHTML='';
-q.a.forEach((answer,i)=>{
-const b=document.createElement('button');
-b.className='answer';
-const letter=document.createElement('span');
-letter.className='letter';
-letter.textContent=q.type==='tf'
-? (i===0?'✓':'✕')
-: String.fromCharCode(65+i);
-const t=document.createElement('span');
-t.textContent=answer;
-b.append(letter,t);
-b.addEventListener('click',()=>{
-if(q.type==='multi'){
-toggleChoice(i,b);
-}else{
-choose([i],b);
-}
-});
-$('answers').append(b);
-});
+  locked=false; selected=[];
+  const q=activeQuestions[index];
+  $('count').textContent=`Sual ${index+1} / ${activeQuestions.length}`;
+  $('percent').textContent=`${Math.round((index+1)/activeQuestions.length*100)}%`;
+  $('fill').style.width=`${(index+1)/activeQuestions.length*100}%`;
+  $('topic').textContent=q.topic; $('question').textContent=q.q;
+  $('feedback').className='hidden'; $('feedback').innerHTML='';
+  $('nextBtn').classList.add('hidden'); $('checkBtn').classList.add('hidden');
+  $('multiNotice').classList.toggle('hidden',q.type!=='multi'); $('answers').innerHTML='';
+  q.a.forEach((answer,i)=>{
+    const b=document.createElement('button'); b.className='answer';
+    const letter=document.createElement('span'); letter.className='letter';
+    letter.textContent=q.type==='tf'?(i===0?'✓':'✕'):String.fromCharCode(65+i);
+    const t=document.createElement('span'); t.textContent=answer; b.append(letter,t);
+    b.addEventListener('click',()=>q.type==='multi'?toggleChoice(i,b):choose([i]));
+    $('answers').append(b);
+  });
 }
 function toggleChoice(i,button){
-if(locked)return;
-if(selected.includes(i)){
-selected=selected.filter(x=>x!==i);
-button.classList.remove('selected');
-}else{
-selected.push(i);
-button.classList.add('selected');
+  if(locked)return;
+  if(selected.includes(i)){selected=selected.filter(x=>x!==i);button.classList.remove('selected');}
+  else{selected.push(i);button.classList.add('selected');}
+  $('checkBtn').classList.toggle('hidden',selected.length===0);
 }
-$('checkBtn').classList.toggle('hidden',selected.length===0);
-}
-function choose(values,button){
-if(locked)return;
-selected=values;
-evaluateAnswer();
-}
-function checkMulti(){
-if(locked || selected.length===0)return;
-evaluateAnswer();
-}
+function choose(values){if(locked)return;selected=values;evaluateAnswer();}
+function checkMulti(){if(!locked&&selected.length)evaluateAnswer();}
 function evaluateAnswer(){
-locked=true;
-const q=questions[index];
-const isCorrect=
-selected.length===q.c.length &&
-q.c.every(x=>selected.includes(x));
-if(isCorrect){
-correct++;
-}else{
-wrong++;
+  locked=true; const q=activeQuestions[index];
+  const isCorrect=selected.length===q.c.length&&q.c.every(x=>selected.includes(x));
+  if(isCorrect)correct++;else wrong++;
+  [...$('answers').children].forEach((b,i)=>{b.disabled=true;if(q.c.includes(i))b.classList.add('correct');if(selected.includes(i)&&!q.c.includes(i))b.classList.add('wrong');});
+  const fb=$('feedback');
+  if(q.type==='multi'){
+    let html=isCorrect?'✓ Bütün düzgün cavabları seçdin!':'✕ Cavab tam düzgün deyil. Düzgün cavabların izahı:';
+    q.a.forEach((answer,i)=>{html+=`<p><b>${String.fromCharCode(65+i)}. ${answer}</b> — ${q.e[i]}</p>`;}); fb.innerHTML=html;
+  }else{
+    const chosen=selected[0];
+    fb.textContent=isCorrect?'✓ Düzgün cavab! '+q.e[chosen]:'✕ Səhv cavab. Düzgün cavab: '+q.c.map(i=>q.a[i]).join(', ')+'. '+q.e[chosen];
+  }
+  fb.className=isCorrect?'feedback':'feedback bad';
+  $('checkBtn').classList.add('hidden');
+  $('nextBtn').textContent=index===activeQuestions.length-1?'NƏTİCƏYƏ BAX →':'NÖVBƏTİ SUAL →';
+  $('nextBtn').classList.remove('hidden');
 }
-const buttons=[...$('answers').children];
-buttons.forEach((b,i)=>{
-b.disabled=true;
-if(q.c.includes(i)){
-b.classList.add('correct');
-}
-if(selected.includes(i) && !q.c.includes(i)){
-b.classList.add('wrong');
-}
-});
-const fb=$('feedback');
-if(q.type==='multi'){
-let html=isCorrect
-? '✓ Bütün düzgün cavabları seçdin!'
-: '✕ Cavab tam düzgün deyil. Düzgün cavabların izahı:';
-q.a.forEach((answer,i)=>{
-html+=`<p><b>${String.fromCharCode(65+i)}. ${answer}</b> — ${q.e[i]}</p>`;
-});
-fb.innerHTML=html;
-}else{
-const chosen=selected[0];
-if(isCorrect){
-fb.textContent='✓ Düzgün cavab! '+q.e[chosen];
-}else{
-fb.textContent='✕ Səhv cavab. Düzgün cavab: '+
-q.c.map(i=>q.a[i]).join(', ')+'. '+
-q.e[chosen];
-}
-}
-fb.className=isCorrect?'feedback':'feedback bad';
-$('checkBtn').classList.add('hidden');
-$('nextBtn').textContent=
-index===questions.length-1
-?'NƏTİCƏYƏ BAX →'
-:'NÖVBƏTİ SUAL →';
-$('nextBtn').classList.remove('hidden');
-}
-// NƏTİCƏ VƏ SUPABASE
 async function finish(){
-show('result');
-const score=correct*10;
-$('score').textContent=score;
-$('correct').textContent=correct;
-$('wrong').textContent=wrong;
-$('ring').style.setProperty('--score',score+'%');
-let title='Davam et, bacaracaqsan!';
-let msg='Hər test yeni bilik qazanmaq üçün fürsətdir.';
-if(score===100){
-title='Möhtəşəm nəticə! 🏆';
-msg='10 sualın hamısına düzgün cavab verdin. Əhsən!';
-}else if(score>=70){
-title='Çox yaxşı! 🔥';
-msg='IT biliklərin yaxşı səviyyədədir. Belə davam et!';
-}else if(score>=40){
-title='Yaxşı başlanğıcdır! 💪';
-msg='Əsasları bilirsən. Bir az da məşq etsən, nəticən artacaq.';
+  show('result'); const score=Math.round(correct/activeQuestions.length*100);
+  $('score').textContent=score; $('correct').textContent=correct; $('wrong').textContent=wrong;
+  $('ring').style.setProperty('--score',score+'%');
+  let title='Davam et, bacaracaqsan!',msg='Hər test yeni bilik qazanmaq üçün fürsətdir.';
+  if(score===100){title='Möhtəşəm nəticə! 🏆';msg='Bütün suallara düzgün cavab verdin. Əhsən!';}
+  else if(score>=70){title='Çox yaxşı! 🔥';msg='IT biliklərin yaxşı səviyyədədir. Belə davam et!';}
+  else if(score>=40){title='Yaxşı başlanğıcdır! 💪';msg='Əsasları bilirsən. Bir az da məşq etsən, nəticən artacaq.';}
+  $('resultTitle').textContent=title; $('resultText').textContent=`${activeQuestions.length} sualı tamamladın. Nəticən: ${score} bal.`;
+  $('message').textContent=msg;
+  lastResult={quiz_id:activeQuiz.id,participant_name:participantName,score,correct_answers:correct,wrong_answers:wrong,total_questions:activeQuestions.length,answers:activeQuestions.map(q=>({question:q.q,selected_answers:selectedLabels(q),correct_answer:q.c.map(i=>q.a[i]).join(', ')}))};
+  $('saveStatus').textContent='Nəticə yadda saxlanılır...';
+  const {error}=await db.from('quiz_results').insert(lastResult);
+  $('saveStatus').textContent=error?'Nəticə bazaya yazılmadı: '+error.message:'✓ Nəticən uğurla yadda saxlanıldı.';
 }
-$('resultTitle').textContent=title;
-$('resultText').textContent=
-`${questions.length} sualı tamamladın. Nəticən: ${score} bal.`;
-$('message').textContent=msg;
-lastResult={
-participant_name:participantName,
-score,
-correct_answers:correct,
-wrong_answers:wrong,
-total_questions:questions.length,
-answers:questions.map(q=>({
-question:q.q,
-selected_answers:selectedLabels(q),
-correct_answer:q.c.map(i=>q.a[i]).join(', ')
-}))
-};
-$('saveStatus').textContent='';
-if(!db){
-$('saveStatus').textContent=
-'Test bitdi. Nəticə hazırda onlayn bazaya yazılmır; Supabase bağlantısı tamamlanmalıdır.';
-return;
-}
-const {error}=await db.from('quiz_results').insert(lastResult);
-$('saveStatus').textContent=error
-?'Nəticə bazaya yazılmadı. Admin Supabase cədvəl/RLS sazlamasını yoxlamalıdır.'
-:'✓ Nəticən uğurla yadda saxlanıldı.';
-}
-function selectedLabels(q){
-return q._selected
-? q._selected.map(i=>q.a[i])
-: [];
-}
-// EVENT-LƏR
+function selectedLabels(q){return q._selected?q._selected.map(i=>q.a[i]):[];}
 $('startBtn').addEventListener('click',begin);
 $('checkBtn').addEventListener('click',checkMulti);
 $('nextBtn').addEventListener('click',()=>{
-if(index<questions.length-1){
-// İştirakçının cavablarını saxla
-questions[index]._selected=[...selected];
-index++;
-render();
-}else{
-questions[index]._selected=[...selected];
-finish();
-}
+  activeQuestions[index]._selected=[...selected];
+  if(index<activeQuestions.length-1){index++;render();}else finish();
 });
-$('restartBtn').addEventListener('click',()=>{
-$('participant').value=participantName;
-show('start');
-});
-$('adminOpen').addEventListener('click',()=>{
-show('admin');
-});
-$('backBtn').addEventListener('click',()=>{
-show('start');
-});
-// ADMIN GİRİŞİ
+$('restartBtn').addEventListener('click',()=>{$('participant').value=participantName;show('start');});
+$('adminOpen').addEventListener('click',()=>show('admin'));
+$('backBtn').addEventListener('click',()=>show('start'));
+$('quizListBack').addEventListener('click',()=>show('start'));
 $('loginBtn').addEventListener('click',async()=>{
-if(!db){
-$('adminStatus').textContent=
-'Əvvəl Supabase URL və publishable/anon key əlavə edilməlidir.';
-return;
-}
-const {error}=await db.auth.signInWithPassword({
-email:$('adminEmail').value.trim(),
-password:$('adminPassword').value
+  if(!db){$('adminStatus').textContent='Supabase bağlantısı yoxdur.';return;}
+  const {error}=await db.auth.signInWithPassword({email:$('adminEmail').value.trim(),password:$('adminPassword').value});
+  if(error){$('adminStatus').textContent='Giriş alınmadı: '+error.message;return;}
+  $('adminLogin').classList.add('hidden'); $('adminData').classList.remove('hidden'); loadResults();
 });
-if(error){
-$('adminStatus').textContent='Giriş alınmadı: '+error.message;
-return;
-}
-$('adminLogin').classList.add('hidden');
-$('adminData').classList.remove('hidden');
-loadResults();
+$('createQuizBtn').addEventListener('click',async()=>{
+  const title=$('newQuizTitle').value.trim(), description=$('newQuizDescription').value.trim();
+  if(!title){$('createQuizStatus').textContent='Quiz-in adını yaz.';return;}
+  let qs;
+  try{qs=JSON.parse($('newQuizQuestions').value);if(!Array.isArray(qs)||!qs.length)throw new Error('Suallar JSON massivində olmalıdır.');qs=qs.map(normalizeQuestion);}
+  catch(err){$('createQuizStatus').textContent='JSON xətası: '+err.message;return;}
+  $('createQuizStatus').textContent='Yadda saxlanılır...';
+  const {error}=await db.from('quizzes').insert({title,description,questions:qs,is_active:true});
+  if(error){$('createQuizStatus').textContent='Yadda saxlanmadı: '+error.message;return;}
+  $('createQuizStatus').textContent='✓ Quiz yaradıldı. Köhnə Quiz-lər saxlanılıb.';
+  $('newQuizTitle').value='';$('newQuizDescription').value='';$('newQuizQuestions').value='';
+  loadResults();
 });
-// ADMIN NƏTİCƏLƏRİ
 async function loadResults(){
-if(!db)return;
-$('adminStatus').textContent='Nəticələr yüklənir...';
-const {data,error}=await db
-.from('quiz_results')
-.select('id,participant_name,score,correct_answers,wrong_answers,created_at')
-.order('created_at',{ascending:false})
-.limit(500);
-if(error){
-$('adminStatus').textContent='Məlumat alınmadı: '+error.message;
-return;
-}
-window.quizAdminRows=data||[];
-$('resultsBody').innerHTML='';
-window.quizAdminRows.forEach(r=>{
-const tr=document.createElement('tr');
-[
-r.participant_name,
-r.score,
-r.correct_answers,
-r.wrong_answers,
-new Date(r.created_at).toLocaleString('az-AZ')
-].forEach(v=>{
-const td=document.createElement('td');
-td.textContent=v??'';
-tr.append(td);
-});
-$('resultsBody').append(tr);
-});
-$('adminStatus').textContent=
-`Cəmi ${window.quizAdminRows.length} nəticə göstərilir.`;
+  if(!db)return; $('adminStatus').textContent='Nəticələr yüklənir...';
+  const {data,error}=await db.from('quiz_results').select('id,quiz_id,participant_name,score,correct_answers,wrong_answers,created_at,quizzes(title)').order('created_at',{ascending:false}).limit(500);
+  if(error){$('adminStatus').textContent='Məlumat alınmadı: '+error.message;return;}
+  adminRows=data||[]; $('resultsBody').innerHTML='';
+  adminRows.forEach(r=>{
+    const tr=document.createElement('tr');
+    [r.quizzes?.title||'Köhnə Quiz / təyin edilməyib',r.participant_name,r.score,r.correct_answers,r.wrong_answers,new Date(r.created_at).toLocaleString('az-AZ')].forEach(v=>{const td=document.createElement('td');td.textContent=v??'';tr.append(td);});
+    $('resultsBody').append(tr);
+  });
+  $('adminStatus').textContent=`Cəmi ${adminRows.length} nəticə göstərilir.`;
 }
 $('refreshBtn').addEventListener('click',loadResults);
-// ADMIN ÇIXIŞ
-$('logoutBtn').addEventListener('click',async()=>{
-await db?.auth.signOut();
-$('adminData').classList.add('hidden');
-$('adminLogin').classList.remove('hidden');
-$('adminStatus').textContent='Sessiyadan çıxıldı.';
-});
-// CSV YÜKLƏMƏ
+$('logoutBtn').addEventListener('click',async()=>{await db?.auth.signOut();$('adminData').classList.add('hidden');$('adminLogin').classList.remove('hidden');$('adminStatus').textContent='Sessiyadan çıxıldı.';});
 $('csvBtn').addEventListener('click',()=>{
-const rows=window.quizAdminRows||[];
-const csv=[
-'Ad,Bal,Duzgun,Səhv,Tarix',
-...rows.map(r=>
-[
-r.participant_name,
-r.score,
-r.correct_answers,
-r.wrong_answers,
-r.created_at
-].map(v=>
-'"'+String(v??'').replaceAll('"','""')+'"'
-).join(',')
-)
-].join('\n');
-const blob=new Blob(
-['\ufeff'+csv],
-{type:'text/csv;charset=utf-8'}
-);
-const a=document.createElement('a');
-a.href=URL.createObjectURL(blob);
-a.download='cyberx-az-quiz-results.csv';
-a.click();
-URL.revokeObjectURL(a.href);
+  const rows=adminRows; const csv=['Quiz,Ad,Bal,Duzgun,Səhv,Tarix',...rows.map(r=>[r.quizzes?.title||'Köhnə Quiz',r.participant_name,r.score,r.correct_answers,r.wrong_answers,r.created_at].map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(','))].join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='cyberx-az-quiz-results.csv';a.click();URL.revokeObjectURL(a.href);
 });
+// İlk mövcud Quiz-in sualları SQL seed ilə bazaya əlavə olunur; bu massiv yalnız köçürmə üçün saxlanır.
+const legacyQuestions = [
+  {
+    "topic": "Network Administration / Subnet Mask",
+    "type": "single",
+    "q": "Subnet Mask (255.255.255.0) şəbəkədə əsasən nəyi müəyyən edir?",
+    "a": [
+      "DNS serverin ünvanını",
+      "Default Gateway-i",
+      "Şəbəkə və host hissəsini",
+      "Kompüterin MAC ünvanını"
+    ],
+    "c": [
+      2
+    ],
+    "e": [
+      "Subnet Mask DNS serverin ünvanını göstərmir.",
+      "Default Gateway ayrıca IP parametridir.",
+      "Subnet Mask IP ünvanının hansı hissəsinin şəbəkəyə, hansı hissəsinin hosta aid olduğunu müəyyən edir.",
+      "MAC ünvanı şəbəkə adapterinin fiziki ünvanıdır."
+    ]
+  },
+  {
+    "topic": "Network Administration / VLAN",
+    "type": "single",
+    "q": "Switch-də VLAN nə üçün yaradılır?",
+    "a": [
+      "Şəbəkəni məntiqi hissələrə bölmək",
+      "İnternet sürətini avtomatik artırmaq",
+      "Kompüterə antivirus quraşdırmaq",
+      "Kabelin uzunluğunu artırmaq"
+    ],
+    "c": [
+      0
+    ],
+    "e": [
+      "VLAN eyni fiziki switch üzərində ayrı məntiqi şəbəkələr və broadcast domain-lər yaratmağa imkan verir.",
+      "VLAN özü internet sürətini avtomatik artırmır.",
+      "Antivirus quraşdırmaq VLAN-ın funksiyası deyil.",
+      "VLAN kabelin fiziki uzunluğuna təsir etmir."
+    ]
+  },
+  {
+    "topic": "Network Administration / DNS",
+    "type": "single",
+    "q": "DNS sistemində A record hansı məlumatı saxlayır?",
+    "a": [
+      "Domen adının IPv4 ünvanını",
+      "Domen adının MAC ünvanını",
+      "Mail serverin parolunu",
+      "Switch-in port nömrəsini"
+    ],
+    "c": [
+      0
+    ],
+    "e": [
+      "A record domen adını IPv4 ünvanı ilə əlaqələndirir.",
+      "MAC ünvanları DNS A record-da saxlanılmır.",
+      "Mail serverin parolu DNS qeydinin bir hissəsi deyil.",
+      "Switch port nömrəsi DNS A record məlumatı deyil."
+    ]
+  },
+  {
+    "topic": "Network Administration / Default Gateway",
+    "type": "single",
+    "q": "Default Gateway nə üçün istifadə olunur?",
+    "a": [
+      "Kompüterdə faylları qorumaq üçün",
+      "Digər şəbəkələrə çıxış üçün",
+      "MAC ünvanını dəyişmək üçün",
+      "Wi-Fi siqnalını gücləndirmək üçün"
+    ],
+    "c": [
+      1
+    ],
+    "e": [
+      "Faylların qorunması Default Gateway-in funksiyası deyil.",
+      "Default Gateway lokal şəbəkədən kənar şəbəkələrə, məsələn internetə trafik göndərmək üçün istifadə olunur.",
+      "MAC ünvanını dəyişmək onun funksiyası deyil.",
+      "Wi-Fi siqnalının gücləndirilməsi Access Point və radio əhatə dairəsi ilə bağlıdır."
+    ]
+  },
+  {
+    "topic": "Network Administration / Switch",
+    "type": "single",
+    "q": "Switch-ə yeni kompüter qoşulduqda switch onun MAC ünvanını əsasən harada öyrənir və saxlayır?",
+    "a": [
+      "Routing Table",
+      "DNS Cache",
+      "MAC Address Table",
+      "DHCP Pool"
+    ],
+    "c": [
+      2
+    ],
+    "e": [
+      "Routing Table Layer 3 marşrutları saxlayır.",
+      "DNS Cache domen adları ilə IP ünvanları arasındakı nəticələri saxlayır.",
+      "Switch daxil olan Ethernet frame-lərin source MAC ünvanlarını öyrənərək MAC Address Table-da saxlayır.",
+      "DHCP Pool paylana bilən IP ünvanları diapazonudur."
+    ]
+  },
+  {
+    "topic": "Network Administration / Troubleshooting",
+    "type": "single",
+    "q": "ping 192.168.1.1 əmri əsasən nəyi yoxlayır?",
+    "a": [
+      "Diskin yaddaşını",
+      "Kompüterin temperaturunu",
+      "Şəbəkə cihazı ilə əlaqənin olub-olmadığını",
+      "Kompüterdəki istifadəçi hesablarını"
+    ],
+    "c": [
+      2
+    ],
+    "e": [
+      "ping disk yaddaşını yoxlamır.",
+      "ping kompüterin temperaturunu ölçmür.",
+      "ping ICMP sorğuları göndərərək göstərilən IP ünvanının cavab verib-vermədiyini yoxlamağa kömək edir.",
+      "İstifadəçi hesablarını idarə etmək üçün nəzərdə tutulmayıb."
+    ]
+  },
+  {
+    "topic": "Network Administration / Cabling",
+    "type": "multi",
+    "q": "Şəbəkə kabelləri ilə bağlı hansı fikirlər doğrudur? Bütün düzgün cavabları seç.",
+    "a": [
+      "Fiber optik kabel məlumatı elektrik siqnalı ilə ötürür",
+      "RJ45 konnektoru Ethernet bağlantısında istifadə olunur",
+      "Fiber optik kabel məlumatı işıq vasitəsilə ötürür",
+      "UTP kabelində 4 cüt naqil olur"
+    ],
+    "c": [
+      1,
+      2,
+      3
+    ],
+    "e": [
+      "Fiber optik kabel məlumatı elektrik siqnalı ilə deyil, işıq impulsları ilə ötürür.",
+      "RJ45 konnektoru Ethernet şəbəkə kabellərində geniş istifadə olunur.",
+      "Fiber optik kabel məlumatı işıq vasitəsilə ötürür.",
+      "Standart Ethernet UTP kabelində 4 cüt, yəni 8 naqil olur."
+    ]
+  },
+  {
+    "topic": "Network Administration / Wi-Fi",
+    "type": "multi",
+    "q": "Wi-Fi şəbəkəsində bağlantı zəifdirsə, administrator hansı addımları yoxlaya bilər? Bütün düzgün cavabları seç.",
+    "a": [
+      "Divar kağızının rəngini dəyişmək",
+      "Siqnal gücünü yoxlamaq",
+      "Wi-Fi kanalında sıxlığı yoxlamaq",
+      "Access Point-in yerləşməsini yoxlamaq"
+    ],
+    "c": [
+      1,
+      2,
+      3
+    ],
+    "e": [
+      "Divar kağızının rənginin Wi-Fi siqnalına təsiri yoxdur.",
+      "Siqnal gücünü yoxlamaq zəif bağlantının səbəbini müəyyənləşdirməyə kömək edir.",
+      "Eyni kanalda çoxlu şəbəkə olduqda müdaxilə yarana bilər.",
+      "Access Point-in yeri əhatə dairəsinə və siqnal keyfiyyətinə təsir edir."
+    ]
+  },
+  {
+    "topic": "Network Administration / Private IP",
+    "type": "tf",
+    "q": "192.168.1.10 ünvanı IPv4-də private IP ünvanı hesab olunur.",
+    "a": [
+      "Doğru",
+      "Yanlış"
+    ],
+    "c": [
+      0
+    ],
+    "e": [
+      "192.168.0.0–192.168.255.255 diapazonu private IPv4 ünvanları üçün ayrılıb.",
+      "192.168.1.10 private IPv4 diapazonuna daxildir."
+    ]
+  },
+  {
+    "topic": "Network Administration / Ethernet",
+    "type": "tf",
+    "q": "Ethernet şəbəkəsində duplex mismatch bağlantıda performans problemlərinə səbəb ola bilər.",
+    "a": [
+      "Doğru",
+      "Yanlış"
+    ],
+    "c": [
+      0
+    ],
+    "e": [
+      "Duplex mismatch paket itkisi, collision və aşağı ötürmə sürəti kimi problemlərə səbəb ola bilər.",
+      "Duplex rejimlərinin uyğunsuzluğu Ethernet bağlantısının performansına mənfi təsir göstərə bilər."
+    ]
+  }
+];
 </script>
 </body>
 </html>
