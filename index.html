@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="az">
 <head>
@@ -74,12 +73,10 @@ body{padding:14px 9px}
 </head>
 <body>
 <main class="app">
-
 <header>
 <div class="brand">Cyber<span>X</span> AZ</div>
 <div class="tag">IT KNOWLEDGE TEST</div>
 </header>
-
 <section class="card" id="start">
 <div class="eyebrow">Özünü yoxlamağın vaxtıdır</div>
 <h1>IT biliklərin<br>nə yerdədir?</h1>
@@ -96,7 +93,6 @@ body{padding:14px 9px}
 <div class="muted">CyberX AZ • Öyrən, sına, inkişaf et</div>
 <a class="adminlink" id="adminOpen">Admin paneli</a>
 </section>
-
 <section class="card hidden" id="quiz">
 <div class="progressrow">
 <span id="count">Sual 1 / 10</span>
@@ -111,7 +107,6 @@ body{padding:14px 9px}
 <button class="primary hidden" id="checkBtn">CAVABI TƏSDİQLƏ ✓</button>
 <button class="primary next hidden" id="nextBtn">NÖVBƏTİ SUAL →</button>
 </section>
-
 <section class="card hidden" id="result">
 <div class="eyebrow">Test tamamlandı</div>
 <h1 id="resultTitle">Əla iş!</h1>
@@ -131,7 +126,6 @@ body{padding:14px 9px}
 <button class="primary" id="restartBtn">YENİDƏN CƏHD ET ↻</button>
 <div class="muted">CyberX AZ • Bilik paylaş, inkişaf et</div>
 </section>
-
 <section class="card hidden" id="admin">
 <div class="eyebrow">CyberX AZ</div>
 <h1>Admin paneli</h1>
@@ -161,214 +155,192 @@ body{padding:14px 9px}
 </div>
 <button class="secondary" id="backBtn" style="width:100%;margin-top:18px">Geri qayıt</button>
 </section>
-
 </main>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-
 // SUPABASE BAĞLANTISI
 const SUPABASE_URL = "https://chkatxaiuaaynhdkzvsd.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_4Z4mDmXQ8j5VkoN8nfvotg_SQXwqQsj";
-
 const supabaseReady =
 SUPABASE_URL.startsWith('https://') &&
 !SUPABASE_URL.includes('YOUR_') &&
 !SUPABASE_ANON_KEY.includes('YOUR_');
-
 const db = supabaseReady
 ? window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)
 : null;
-
-
 // YENİ 10 SUAL
 // type: single = bir cavab
 // type: multi = bir neçə cavab
 // type: tf = doğru / yanlış
-
 const questions = [
-
 {
-topic:"Help Desk / IP ünvanları",
+topic:"Network Administration / Subnet Mask",
 type:"single",
-q:"Windows kompüterində IP ünvanı 169.254.12.25 olaraq görünür. Bu vəziyyət ən çox nəyi göstərir?",
+q:"Subnet Mask (255.255.255.0) şəbəkədə əsasən nəyi müəyyən edir?",
 a:[
-"Kompüter DHCP serverindən IP ala bilməyib",
-"DNS serveri cavab vermir",
-"Default Gateway düzgün deyil",
-"Şəbəkə kartı 1 Gbps dəstəkləmir"
+"DNS serverin ünvanını",
+"Default Gateway-i",
+"Şəbəkə və host hissəsini",
+"Kompüterin MAC ünvanını"
+],
+c:[2],
+e:[
+"Subnet Mask DNS serverin ünvanını göstərmir.",
+"Default Gateway ayrıca IP parametridir.",
+"Subnet Mask IP ünvanının hansı hissəsinin şəbəkəyə, hansı hissəsinin hosta aid olduğunu müəyyən edir.",
+"MAC ünvanı şəbəkə adapterinin fiziki ünvanıdır."
+]
+},
+{
+topic:"Network Administration / VLAN",
+type:"single",
+q:"Switch-də VLAN nə üçün yaradılır?",
+a:[
+"Şəbəkəni məntiqi hissələrə bölmək",
+"İnternet sürətini avtomatik artırmaq",
+"Kompüterə antivirus quraşdırmaq",
+"Kabelin uzunluğunu artırmaq"
 ],
 c:[0],
 e:[
-"169.254.x.x ünvanı Windows-un DHCP vasitəsilə ünvan ala bilmədikdə istifadə etdiyi APIPA ünvanıdır.",
-"DNS problemi adətən IP ünvanının 169.254.x.x olmasına səbəb olmur.",
-"Gateway problemi internetə çıxışı poza bilər, amma bu ünvanın yaranmasının əsas səbəbi deyil.",
-"Şəbəkə sürətinin IP ünvanının bu formada olmasına aidiyyəti yoxdur."
+"VLAN eyni fiziki switch üzərində ayrı məntiqi şəbəkələr və broadcast domain-lər yaratmağa imkan verir.",
+"VLAN özü internet sürətini avtomatik artırmır.",
+"Antivirus quraşdırmaq VLAN-ın funksiyası deyil.",
+"VLAN kabelin fiziki uzunluğuna təsir etmir."
 ]
 },
-
 {
 topic:"Network Administration / DNS",
 type:"single",
-q:"İstifadəçi IP ünvanı ilə serverə qoşula bilir, amma serverin domen adını yazdıqda qoşula bilmir. İlk növbədə hansı xidməti yoxlamaq lazımdır?",
+q:"DNS sistemində A record hansı məlumatı saxlayır?",
 a:[
-"DHCP",
-"DNS",
-"NTP",
-"SNMP"
-],
-c:[1],
-e:[
-"DHCP avtomatik IP konfiqurasiyasını təmin edir; IP ilə bağlantı artıq mümkündür.",
-"DNS domen adlarını IP ünvanlarına çevirir. Domenlə bağlantı problemi bu xidməti yoxlamağı tələb edir.",
-"NTP sistem saatlarını sinxronlaşdırır, domen adlarını həll etmir.",
-"SNMP şəbəkə avadanlıqlarının monitorinqi üçün istifadə olunur."
-]
-},
-
-{
-topic:"System Administration / Active Directory",
-type:"single",
-q:"Active Directory mühitində istifadəçinin kompüterə domen hesabı ilə daxil olması üçün hansı server rolu əsasdır?",
-a:[
-"File Server",
-"Print Server",
-"Domain Controller",
-"Web Server"
-],
-c:[2],
-e:[
-"File Server fayl paylaşımını təmin edir, domen autentifikasiyasının əsas xidməti deyil.",
-"Print Server printerlərin idarə edilməsinə xidmət edir.",
-"Domain Controller Active Directory autentifikasiyasını və domen xidmətlərini təmin edir.",
-"Web Server veb məzmun təqdim edir, domen girişini idarə etmir."
-]
-},
-
-{
-topic:"Virtualization / VirtualBox",
-type:"single",
-q:"VirtualBox-da yaradılmış virtual maşın Host-Only şəbəkə rejimində işləyir. Bu rejimin əsas xüsusiyyəti hansıdır?",
-a:[
-"VM yalnız host kompüterlə və eyni Host-Only şəbəkədəki VM-lərlə əlaqə yarada bilər",
-"VM avtomatik olaraq internetə NAT vasitəsilə çıxır",
-"VM fiziki LAN-da ayrıca kompüter kimi görünür",
-"VM yalnız digər fiziki kompüterlərlə əlaqə yaradır"
+"Domen adının IPv4 ünvanını",
+"Domen adının MAC ünvanını",
+"Mail serverin parolunu",
+"Switch-in port nömrəsini"
 ],
 c:[0],
 e:[
-"Host-Only host və həmin virtual şəbəkədəki maşınlar arasında əlaqə yaradır; standart halda xarici şəbəkəyə çıxış vermir.",
-"Bu, NAT rejiminin xüsusiyyətidir, Host-Only rejiminin deyil.",
-"Bu xüsusiyyət Bridged rejiminə aiddir.",
-"Host-Only rejimi host kompüterlə əlaqəni dəstəkləyir."
+"A record domen adını IPv4 ünvanı ilə əlaqələndirir.",
+"MAC ünvanları DNS A record-da saxlanılmır.",
+"Mail serverin parolu DNS qeydinin bir hissəsi deyil.",
+"Switch port nömrəsi DNS A record məlumatı deyil."
 ]
 },
-
 {
-topic:"Cybersecurity / Phishing",
+topic:"Network Administration / Default Gateway",
 type:"single",
-q:"Bir istifadəçi şübhəli e-mail vasitəsilə daxil olduğu saxta saytda korporativ parolunu yazıb. Bu hücumun adı nədir?",
+q:"Default Gateway nə üçün istifadə olunur?",
 a:[
-"Brute Force",
-"Phishing",
-"DDoS",
-"Port Scanning"
+"Kompüterdə faylları qorumaq üçün",
+"Digər şəbəkələrə çıxış üçün",
+"MAC ünvanını dəyişmək üçün",
+"Wi-Fi siqnalını gücləndirmək üçün"
 ],
 c:[1],
 e:[
-"Brute Force parol kombinasiyalarının çoxsaylı sınaqlarla yoxlanmasıdır.",
-"Phishing saxta mesaj və saytlarla istifadəçinin məxfi məlumatlarını ələ keçirməyə çalışır.",
-"DDoS xidmətin əlçatanlığını pozmaq üçün çoxsaylı sorğular göndərir.",
-"Port Scanning sistemdə açıq portları müəyyənləşdirmək üçün aparılır."
+"Faylların qorunması Default Gateway-in funksiyası deyil.",
+"Default Gateway lokal şəbəkədən kənar şəbəkələrə, məsələn internetə trafik göndərmək üçün istifadə olunur.",
+"MAC ünvanını dəyişmək onun funksiyası deyil.",
+"Wi-Fi siqnalının gücləndirilməsi Access Point və radio əhatə dairəsi ilə bağlıdır."
 ]
 },
-
 {
-topic:"Help Desk / Network Troubleshooting",
+topic:"Network Administration / Switch",
+type:"single",
+q:"Switch-ə yeni kompüter qoşulduqda switch onun MAC ünvanını əsasən harada öyrənir və saxlayır?",
+a:[
+"Routing Table",
+"DNS Cache",
+"MAC Address Table",
+"DHCP Pool"
+],
+c:[2],
+e:[
+"Routing Table Layer 3 marşrutları saxlayır.",
+"DNS Cache domen adları ilə IP ünvanları arasındakı nəticələri saxlayır.",
+"Switch daxil olan Ethernet frame-lərin source MAC ünvanlarını öyrənərək MAC Address Table-da saxlayır.",
+"DHCP Pool paylana bilən IP ünvanları diapazonudur."
+]
+},
+{
+topic:"Network Administration / Troubleshooting",
+type:"single",
+q:"ping 192.168.1.1 əmri əsasən nəyi yoxlayır?",
+a:[
+"Diskin yaddaşını",
+"Kompüterin temperaturunu",
+"Şəbəkə cihazı ilə əlaqənin olub-olmadığını",
+"Kompüterdəki istifadəçi hesablarını"
+],
+c:[2],
+e:[
+"ping disk yaddaşını yoxlamır.",
+"ping kompüterin temperaturunu ölçmür.",
+"ping ICMP sorğuları göndərərək göstərilən IP ünvanının cavab verib-vermədiyini yoxlamağa kömək edir.",
+"İstifadəçi hesablarını idarə etmək üçün nəzərdə tutulmayıb."
+]
+},
+{
+topic:"Network Administration / Cabling",
 type:"multi",
-q:"Windows kompüterində istifadəçi internetə qoşula bilmir. Hansı komandalar şəbəkə probleminin diaqnostikasında faydalıdır? Bütün düzgün cavabları seçin.",
+q:"Şəbəkə kabelləri ilə bağlı hansı fikirlər doğrudur? Bütün düzgün cavabları seç.",
 a:[
-"ipconfig /all",
-"nslookup",
-"ping",
-"format"
+"Fiber optik kabel məlumatı elektrik siqnalı ilə ötürür",
+"RJ45 konnektoru Ethernet bağlantısında istifadə olunur",
+"Fiber optik kabel məlumatı işıq vasitəsilə ötürür",
+"UTP kabelində 4 cüt naqil olur"
 ],
-c:[0,1,2],
+c:[1,2,3],
 e:[
-"Şəbəkə adapterlərinin IP, Gateway, DNS və DHCP məlumatlarını göstərir.",
-"DNS sorğularını yoxlamağa və domen adının hansı IP-yə çevrildiyini müəyyən etməyə kömək edir.",
-"Şəbəkə ünvanına ICMP sorğuları göndərərək əlçatanlığı yoxlamağa kömək edir.",
-"Disk və ya bölməni formatlamaq üçündür, şəbəkə diaqnostikası komandası deyil."
+"Fiber optik kabel məlumatı elektrik siqnalı ilə deyil, işıq impulsları ilə ötürür.",
+"RJ45 konnektoru Ethernet şəbəkə kabellərində geniş istifadə olunur.",
+"Fiber optik kabel məlumatı işıq vasitəsilə ötürür.",
+"Standart Ethernet UTP kabelində 4 cüt, yəni 8 naqil olur."
 ]
 },
-
 {
-topic:"Virtualization / Hypervisor",
+topic:"Network Administration / Wi-Fi",
+type:"multi",
+q:"Wi-Fi şəbəkəsində bağlantı zəifdirsə, administrator hansı addımları yoxlaya bilər? Bütün düzgün cavabları seç.",
+a:[
+"Divar kağızının rəngini dəyişmək",
+"Siqnal gücünü yoxlamaq",
+"Wi-Fi kanalında sıxlığı yoxlamaq",
+"Access Point-in yerləşməsini yoxlamaq"
+],
+c:[1,2,3],
+e:[
+"Divar kağızının rənginin Wi-Fi siqnalına təsiri yoxdur.",
+"Siqnal gücünü yoxlamaq zəif bağlantının səbəbini müəyyənləşdirməyə kömək edir.",
+"Eyni kanalda çoxlu şəbəkə olduqda müdaxilə yarana bilər.",
+"Access Point-in yeri əhatə dairəsinə və siqnal keyfiyyətinə təsir edir."
+]
+},
+{
+topic:"Network Administration / Private IP",
 type:"tf",
-q:"Hypervisor Type 1 birbaşa fiziki avadanlıq üzərində işləyir və ayrıca host əməliyyat sisteminə ehtiyac duymur.",
+q:"192.168.1.10 ünvanı IPv4-də private IP ünvanı hesab olunur.",
 a:["Doğru","Yanlış"],
 c:[0],
 e:[
-"Type 1 Hypervisor birbaşa fiziki avadanlıq üzərində işləyir (bare-metal arxitektura).",
-"Bu xüsusiyyət Type 1 Hypervisor üçün doğrudur; Type 2 isə host əməliyyat sistemi üzərində işləyir."
+"192.168.0.0–192.168.255.255 diapazonu private IPv4 ünvanları üçün ayrılıb.",
+"192.168.1.10 private IPv4 diapazonuna daxildir."
 ]
 },
-
 {
-topic:"System Administration / Linux",
-type:"single",
-q:"Linux sistemində hazırkı qovluqdakı fayl və qovluqların siyahısını göstərmək üçün hansı komanda istifadə olunur?",
-a:[
-"pwd",
-"cd",
-"ls",
-"mkdir"
-],
-c:[2],
-e:[
-"pwd cari iş qovluğunun yolunu göstərir.",
-"cd qovluqlar arasında keçid etmək üçündür.",
-"ls cari qovluqdakı fayl və qovluqları siyahı şəklində göstərir.",
-"mkdir yeni qovluq yaratmaq üçündür."
-]
-},
-
-{
-topic:"Network Administration / VLAN",
+topic:"Network Administration / Ethernet",
 type:"tf",
-q:"VLAN vasitəsilə eyni fiziki switch üzərindəki portlar fərqli Layer 2 broadcast domain-lərə ayrıla bilər.",
+q:"Ethernet şəbəkəsində duplex mismatch bağlantıda performans problemlərinə səbəb ola bilər.",
 a:["Doğru","Yanlış"],
 c:[0],
 e:[
-"VLAN eyni fiziki switch daxilində ayrı Layer 2 broadcast domain-lər yaradır.",
-"VLAN məhz fiziki switch üzərində məntiqi Layer 2 şəbəkə seqmentləri yaratmağa imkan verir."
-]
-},
-
-{
-topic:"System Administration / Group Policy",
-type:"single",
-q:"Windows Server-də Group Policy əsasən hansı məqsədlə istifadə olunur?",
-a:[
-"Şəbəkə kabellərinin test edilməsi",
-"İstifadəçi və kompüterlərə mərkəzləşdirilmiş siyasətlərin tətbiqi",
-"Virtual disklərin fiziki ölçüsünün artırılması",
-"DNS sorğularının şifrələnməsi"
-],
-c:[1],
-e:[
-"Kabel testləri fiziki şəbəkə diaqnostikası vasitəsilə aparılır.",
-"Group Policy domen mühitində təhlükəsizlik, sistem və istifadəçi parametrlərini mərkəzləşdirilmiş idarə etməyə imkan verir.",
-"Virtual disk ölçüsü Hypervisor və disk idarəetmə vasitələri ilə dəyişdirilir.",
-"Group Policy DNS sorğularını birbaşa şifrələyən xidmət deyil."
+"Duplex mismatch paket itkisi, collision və aşağı ötürmə sürəti kimi problemlərə səbəb ola bilər.",
+"Duplex rejimlərinin uyğunsuzluğu Ethernet bağlantısının performansına mənfi təsir göstərə bilər."
 ]
 }
-
 ];
-
-
 // TEST MƏNTİQİ
-
 let index=0;
 let correct=0;
 let wrong=0;
@@ -376,94 +348,63 @@ let locked=false;
 let selected=[];
 let participantName='';
 let lastResult=null;
-
 const $=id=>document.getElementById(id);
-
 function show(id){
 ['start','quiz','result','admin'].forEach(x=>{
 $(x).classList.toggle('hidden',x!==id);
 });
 }
-
 function begin(){
-
 participantName=$('participant').value.trim();
-
 if(participantName.length<2){
 $('startNotice').textContent='Zəhmət olmasa adını daxil et.';
 return;
 }
-
 $('startNotice').textContent='';
 index=0;
 correct=0;
 wrong=0;
 show('quiz');
 render();
-
 }
-
 function render(){
-
 locked=false;
 selected=[];
-
 const q=questions[index];
-
 $('count').textContent=`Sual ${index+1} / ${questions.length}`;
 $('percent').textContent=`${Math.round((index+1)/questions.length*100)}%`;
 $('fill').style.width=`${(index+1)/questions.length*100}%`;
-
 $('topic').textContent=q.topic;
 $('question').textContent=q.q;
-
 $('feedback').className='hidden';
 $('feedback').innerHTML='';
-
 $('nextBtn').classList.add('hidden');
 $('checkBtn').classList.add('hidden');
-
 $('multiNotice').classList.toggle('hidden',q.type!=='multi');
-
 $('answers').innerHTML='';
-
 q.a.forEach((answer,i)=>{
-
 const b=document.createElement('button');
 b.className='answer';
-
 const letter=document.createElement('span');
 letter.className='letter';
 letter.textContent=q.type==='tf'
 ? (i===0?'✓':'✕')
 : String.fromCharCode(65+i);
-
 const t=document.createElement('span');
 t.textContent=answer;
-
 b.append(letter,t);
-
 b.addEventListener('click',()=>{
-
 if(q.type==='multi'){
 toggleChoice(i,b);
 }else{
 choose([i],b);
 }
-
 });
-
 $('answers').append(b);
-
 });
-
 }
-
-
 function toggleChoice(i,button){
-
 if(locked)return;
-
 if(selected.includes(i)){
 selected=selected.filter(x=>x!==i);
 button.classList.remove('selected');
@@ -471,128 +412,75 @@ button.classList.remove('selected');
 selected.push(i);
 button.classList.add('selected');
 }
-
 $('checkBtn').classList.toggle('hidden',selected.length===0);
-
 }
-
-
 function choose(values,button){
-
 if(locked)return;
-
 selected=values;
 evaluateAnswer();
-
 }
-
-
 function checkMulti(){
-
 if(locked || selected.length===0)return;
-
 evaluateAnswer();
-
 }
-
-
 function evaluateAnswer(){
-
 locked=true;
-
 const q=questions[index];
-
 const isCorrect=
 selected.length===q.c.length &&
 q.c.every(x=>selected.includes(x));
-
 if(isCorrect){
 correct++;
 }else{
 wrong++;
 }
-
 const buttons=[...$('answers').children];
-
 buttons.forEach((b,i)=>{
-
 b.disabled=true;
-
 if(q.c.includes(i)){
 b.classList.add('correct');
 }
-
 if(selected.includes(i) && !q.c.includes(i)){
 b.classList.add('wrong');
 }
-
 });
-
 const fb=$('feedback');
-
 if(q.type==='multi'){
-
 let html=isCorrect
 ? '✓ Bütün düzgün cavabları seçdin!'
 : '✕ Cavab tam düzgün deyil. Düzgün cavabların izahı:';
-
 q.a.forEach((answer,i)=>{
-
 html+=`<p><b>${String.fromCharCode(65+i)}. ${answer}</b> — ${q.e[i]}</p>`;
-
 });
-
 fb.innerHTML=html;
-
 }else{
-
 const chosen=selected[0];
-
 if(isCorrect){
-
 fb.textContent='✓ Düzgün cavab! '+q.e[chosen];
-
 }else{
-
 fb.textContent='✕ Səhv cavab. Düzgün cavab: '+
 q.c.map(i=>q.a[i]).join(', ')+'. '+
 q.e[chosen];
-
 }
-
 }
-
 fb.className=isCorrect?'feedback':'feedback bad';
-
 $('checkBtn').classList.add('hidden');
-
 $('nextBtn').textContent=
 index===questions.length-1
 ?'NƏTİCƏYƏ BAX →'
 :'NÖVBƏTİ SUAL →';
-
 $('nextBtn').classList.remove('hidden');
-
 }
-
-
 // NƏTİCƏ VƏ SUPABASE
-
 async function finish(){
-
 show('result');
-
 const score=correct*10;
-
 $('score').textContent=score;
 $('correct').textContent=correct;
 $('wrong').textContent=wrong;
-
 $('ring').style.setProperty('--score',score+'%');
-
 let title='Davam et, bacaracaqsan!';
 let msg='Hər test yeni bilik qazanmaq üçün fürsətdir.';
-
 if(score===100){
 title='Möhtəşəm nəticə! 🏆';
 msg='10 sualın hamısına düzgün cavab verdin. Əhsən!';
@@ -603,14 +491,10 @@ msg='IT biliklərin yaxşı səviyyədədir. Belə davam et!';
 title='Yaxşı başlanğıcdır! 💪';
 msg='Əsasları bilirsən. Bir az da məşq etsən, nəticən artacaq.';
 }
-
 $('resultTitle').textContent=title;
-
 $('resultText').textContent=
 `${questions.length} sualı tamamladın. Nəticən: ${score} bal.`;
-
 $('message').textContent=msg;
-
 lastResult={
 participant_name:participantName,
 score,
@@ -623,139 +507,82 @@ selected_answers:selectedLabels(q),
 correct_answer:q.c.map(i=>q.a[i]).join(', ')
 }))
 };
-
 $('saveStatus').textContent='';
-
 if(!db){
-
 $('saveStatus').textContent=
 'Test bitdi. Nəticə hazırda onlayn bazaya yazılmır; Supabase bağlantısı tamamlanmalıdır.';
-
 return;
-
 }
-
 const {error}=await db.from('quiz_results').insert(lastResult);
-
 $('saveStatus').textContent=error
 ?'Nəticə bazaya yazılmadı. Admin Supabase cədvəl/RLS sazlamasını yoxlamalıdır.'
 :'✓ Nəticən uğurla yadda saxlanıldı.';
-
 }
-
-
 function selectedLabels(q){
-
 return q._selected
 ? q._selected.map(i=>q.a[i])
 : [];
-
 }
-
-
 // EVENT-LƏR
-
 $('startBtn').addEventListener('click',begin);
-
 $('checkBtn').addEventListener('click',checkMulti);
-
 $('nextBtn').addEventListener('click',()=>{
-
 if(index<questions.length-1){
-
 // İştirakçının cavablarını saxla
 questions[index]._selected=[...selected];
-
 index++;
 render();
-
 }else{
-
 questions[index]._selected=[...selected];
 finish();
-
 }
-
 });
-
 $('restartBtn').addEventListener('click',()=>{
-
 $('participant').value=participantName;
 show('start');
-
 });
-
 $('adminOpen').addEventListener('click',()=>{
 show('admin');
 });
-
 $('backBtn').addEventListener('click',()=>{
 show('start');
 });
-
-
 // ADMIN GİRİŞİ
-
 $('loginBtn').addEventListener('click',async()=>{
-
 if(!db){
-
 $('adminStatus').textContent=
 'Əvvəl Supabase URL və publishable/anon key əlavə edilməlidir.';
-
 return;
-
 }
-
 const {error}=await db.auth.signInWithPassword({
 email:$('adminEmail').value.trim(),
 password:$('adminPassword').value
 });
-
 if(error){
-
 $('adminStatus').textContent='Giriş alınmadı: '+error.message;
 return;
-
 }
-
 $('adminLogin').classList.add('hidden');
 $('adminData').classList.remove('hidden');
-
 loadResults();
-
 });
-
-
 // ADMIN NƏTİCƏLƏRİ
-
 async function loadResults(){
-
 if(!db)return;
-
 $('adminStatus').textContent='Nəticələr yüklənir...';
-
 const {data,error}=await db
 .from('quiz_results')
 .select('id,participant_name,score,correct_answers,wrong_answers,created_at')
 .order('created_at',{ascending:false})
 .limit(500);
-
 if(error){
-
 $('adminStatus').textContent='Məlumat alınmadı: '+error.message;
 return;
-
 }
-
 window.quizAdminRows=data||[];
-
 $('resultsBody').innerHTML='';
-
 window.quizAdminRows.forEach(r=>{
-
 const tr=document.createElement('tr');
-
 [
 r.participant_name,
 r.score,
@@ -763,45 +590,26 @@ r.correct_answers,
 r.wrong_answers,
 new Date(r.created_at).toLocaleString('az-AZ')
 ].forEach(v=>{
-
 const td=document.createElement('td');
 td.textContent=v??'';
 tr.append(td);
-
 });
-
 $('resultsBody').append(tr);
-
 });
-
 $('adminStatus').textContent=
 `Cəmi ${window.quizAdminRows.length} nəticə göstərilir.`;
-
 }
-
 $('refreshBtn').addEventListener('click',loadResults);
-
-
 // ADMIN ÇIXIŞ
-
 $('logoutBtn').addEventListener('click',async()=>{
-
 await db?.auth.signOut();
-
 $('adminData').classList.add('hidden');
 $('adminLogin').classList.remove('hidden');
-
 $('adminStatus').textContent='Sessiyadan çıxıldı.';
-
 });
-
-
 // CSV YÜKLƏMƏ
-
 $('csvBtn').addEventListener('click',()=>{
-
 const rows=window.quizAdminRows||[];
-
 const csv=[
 'Ad,Bal,Duzgun,Səhv,Tarix',
 ...rows.map(r=>
@@ -816,22 +624,16 @@ r.created_at
 ).join(',')
 )
 ].join('\n');
-
 const blob=new Blob(
 ['\ufeff'+csv],
 {type:'text/csv;charset=utf-8'}
 );
-
 const a=document.createElement('a');
-
 a.href=URL.createObjectURL(blob);
 a.download='cyberx-az-quiz-results.csv';
 a.click();
-
 URL.revokeObjectURL(a.href);
-
 });
-
 </script>
 </body>
 </html>
