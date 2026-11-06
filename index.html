@@ -24,15 +24,7 @@ p{color:var(--muted);line-height:1.65}
 .pill{font-size:13px;color:#d5e6fa;background:#1a2b43;border:1px solid #304761;padding:9px 12px;border-radius:30px}
 label.field{display:block;color:#c9d8ea;font-size:13px;font-weight:700;margin:18px 0 8px}
 input[type=text],input[type=email],input[type=password]{width:100%;padding:14px 15px;border:1px solid #3a506d;background:#0c192a;color:white;border-radius:11px;font-size:16px;outline:none}
-input:focus,textarea:focus{border-color:var(--blue)}
-textarea{width:100%;padding:13px;border:1px solid #3a506d;background:#0c192a;color:white;border-radius:11px;font:13px/1.5 monospace;resize:vertical}
-.quiz-admin-list{display:grid;gap:9px;margin:14px 0}
-.quiz-admin-item{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:12px;background:#152740;border:1px solid #354c68;border-radius:12px;flex-wrap:wrap}
-.quiz-admin-item .qmeta{flex:1;min-width:180px}
-.quiz-admin-item small{display:block;color:var(--muted);margin-top:4px}
-.quiz-admin-item button{padding:10px 12px;font-size:12px}
-.nav-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-.nav-buttons button{width:100%}
+input:focus{border-color:var(--blue)}
 button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px;font-weight:800}
 .primary{width:100%;background:linear-gradient(90deg,#2498ef,#47b4ff);color:#041525;font-size:15px;margin-top:18px}
 .secondary{background:#243852;color:#e7f2ff}
@@ -71,6 +63,8 @@ button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:15px 18px
 .admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 .admin-actions button{flex:1}
 .status{font-size:12px;color:#a9bed7;margin-top:12px;min-height:18px}
+.quiz-state{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:800;background:#173b32;color:#8df0c3;border:1px solid #28684f}
+.quiz-state.new{background:#1b2c43;color:#b8dfff;border-color:#355675}
 @media(max-width:480px){
 body{padding:14px 9px}
 .card{border-radius:16px}
@@ -105,7 +99,7 @@ body{padding:14px 9px}
 <section class="card hidden" id="quizList">
   <div class="eyebrow">CyberX AZ • Quiz kataloqu</div>
   <h1>Quiz seç</h1>
-  <p>İştirak etmək istədiyin testi seç. Əvvəlki Quiz-lər burada saxlanılır.</p>
+  <p>İştirak etmək istədiyin testi seç. Bitirdiyin testlər “Tamamlanıb” kimi görünəcək. İstəsən, yenidən işləyə bilərsən.</p>
   <div id="quizCards" class="answers"></div>
   <div id="quizListStatus" class="status"></div>
   <button class="secondary" id="quizListBack" style="width:100%;margin-top:18px">Geri qayıt</button>
@@ -122,8 +116,7 @@ body{padding:14px 9px}
 <div class="answers" id="answers"></div>
 <div id="feedback" class="hidden"></div>
 <button class="primary hidden" id="checkBtn">CAVABI TƏSDİQLƏ ✓</button>
-<div class="nav-buttons"><button class="secondary" id="prevBtn" type="button">← ƏVVƏLKİ SUAL</button><button class="primary next hidden" id="nextBtn" type="button">NÖVBƏTİ SUAL →</button></div>
-<button class="secondary" id="exitQuizBtn" style="width:100%;margin-top:12px">Quiz siyahısına qayıt</button>
+<button class="primary next hidden" id="nextBtn">NÖVBƏTİ SUAL →</button>
 </section>
 <section class="card hidden" id="result">
 <div class="eyebrow">Test tamamlandı</div>
@@ -167,23 +160,6 @@ body{padding:14px 9px}
   <p style="font-size:12px;margin:8px 0">Format: type dəyərləri single, multi və ya tf; c düzgün cavabların indeksləridir (A=0, B=1, C=2, D=3).</p>
   <button class="primary" id="createQuizBtn">QUIZ-İ YADDA SAXLA</button>
   <div id="createQuizStatus" class="status"></div>
-</div>
-<div class="card" style="padding:16px;margin:14px 0;background:#0c192a">
-  <h2 style="margin-bottom:8px">Quiz-ləri idarə et</h2>
-  <p style="margin-top:4px">Mövcud quiz-i redaktə et və ya arxivlə. Redaktə zamanı əvvəlki quizin yerinə yenisi yazılmır.</p>
-  <div id="adminQuizList" class="quiz-admin-list"></div>
-  <div id="editQuizBox" class="hidden">
-    <h3 id="editQuizHeading">Quiz-i redaktə et</h3>
-    <input id="editQuizId" type="hidden">
-    <label class="field" for="editQuizTitle">Quiz-in adı</label>
-    <input id="editQuizTitle" type="text" maxlength="120">
-    <label class="field" for="editQuizDescription">Qısa təsvir</label>
-    <input id="editQuizDescription" type="text" maxlength="240">
-    <label class="field" for="editQuizQuestions">Suallar (JSON)</label>
-    <textarea id="editQuizQuestions" rows="12"></textarea>
-    <div class="nav-buttons"><button class="secondary" id="cancelEditBtn" type="button">Ləğv et</button><button class="primary" id="saveEditBtn" type="button">DƏYİŞİKLİKLƏRİ SAXLA</button></div>
-    <div id="editQuizStatus" class="status"></div>
-  </div>
 </div>
 <div class="admin-actions">
 <button class="secondary" id="refreshBtn">Yenilə</button>
@@ -391,6 +367,12 @@ e:[
 let index=0, correct=0, wrong=0, locked=false, selected=[];
 let participantName='', lastResult=null, activeQuiz=null, activeQuestions=[];
 let adminRows=[];
+// İştirak tarixçəsi bu cihazın brauzerində saxlanılır (qeydiyyat tələb olunmur).
+const COMPLETED_KEY='cyberx_quiz_completed_v1';
+function participantKey(){return participantName.trim().toLocaleLowerCase('az-AZ').replace(/\s+/g,' ');}
+function getCompletedQuizzes(){try{return JSON.parse(localStorage.getItem(COMPLETED_KEY)||'{}');}catch(_){return {};}}
+function hasCompletedQuiz(quizId){const all=getCompletedQuizzes();return !!(all[participantKey()]&&all[participantKey()][quizId]);}
+function markQuizCompleted(quizId){const all=getCompletedQuizzes();const key=participantKey();if(!all[key])all[key]={};all[key][quizId]={completedAt:new Date().toISOString()};localStorage.setItem(COMPLETED_KEY,JSON.stringify(all));}
 const $=id=>document.getElementById(id);
 function show(id){['start','quizList','quiz','result','admin'].forEach(x=>$(x).classList.toggle('hidden',x!==id));}
 function normalizeQuestion(q){
@@ -414,7 +396,9 @@ async function loadPublicQuizzes(){
     const b=document.createElement('button'); b.className='answer'; b.style.display='block';
     const title=document.createElement('strong'); title.textContent=qz.title;
     const desc=document.createElement('div'); desc.style.cssText='color:#9fb0c8;font-size:13px;margin-top:6px'; desc.textContent=(qz.description||'IT bilik testi')+' • '+(Array.isArray(qz.questions)?qz.questions.length:0)+' sual';
-    b.append(title,desc); b.addEventListener('click',()=>beginQuiz(qz)); cards.append(b);
+    const done=hasCompletedQuiz(qz.id);
+    const state=document.createElement('span'); state.className='quiz-state'+(done?'':' new'); state.textContent=done?'✓ Tamamlanıb — yenidən işləyə bilərsən':'İştirak edilməyib';
+    b.append(title,desc,state); b.addEventListener('click',()=>{if(done&&!confirm('Sən bu Quiz-də artıq iştirak etmisən. Yenidən başlamaq istəyirsən? Yeni cəhd ayrıca nəticə kimi saxlanılacaq.'))return;beginQuiz(qz);}); cards.append(b);
   });
 }
 async function begin(){
@@ -428,71 +412,56 @@ function beginQuiz(qz){
   try{activeQuestions=qz.questions.map(normalizeQuestion);}
   catch(err){$('quizListStatus').textContent='Bu Quiz-də sual formatı xətalıdır: '+err.message;return;}
   if(!activeQuestions.length){$('quizListStatus').textContent='Bu Quiz-də sual yoxdur.';return;}
-  activeQuiz=qz; index=0; correct=0; wrong=0; activeQuestions.forEach(q=>{q._selected=[];q._answered=false;});
+  activeQuiz=qz; index=0; correct=0; wrong=0;
+  activeQuestions.forEach(q=>delete q._selected);
   show('quiz'); render();
 }
 function render(){
+  locked=false; selected=[];
   const q=activeQuestions[index];
-  locked=false; selected=[...(q._selected||[])];
   $('count').textContent=`Sual ${index+1} / ${activeQuestions.length}`;
   $('percent').textContent=`${Math.round((index+1)/activeQuestions.length*100)}%`;
   $('fill').style.width=`${(index+1)/activeQuestions.length*100}%`;
   $('topic').textContent=q.topic; $('question').textContent=q.q;
   $('feedback').className='hidden'; $('feedback').innerHTML='';
   $('nextBtn').classList.add('hidden'); $('checkBtn').classList.add('hidden');
-  $('prevBtn').disabled=index===0; $('prevBtn').style.opacity=index===0?'.45':'1';
   $('multiNotice').classList.toggle('hidden',q.type!=='multi'); $('answers').innerHTML='';
   q.a.forEach((answer,i)=>{
     const b=document.createElement('button'); b.className='answer';
     const letter=document.createElement('span'); letter.className='letter';
     letter.textContent=q.type==='tf'?(i===0?'✓':'✕'):String.fromCharCode(65+i);
     const t=document.createElement('span'); t.textContent=answer; b.append(letter,t);
-    if(selected.includes(i))b.classList.add('selected');
     b.addEventListener('click',()=>q.type==='multi'?toggleChoice(i,b):choose([i]));
     $('answers').append(b);
   });
-  if(q._answered){showFeedback(q,selected);$('nextBtn').textContent=index===activeQuestions.length-1?'NƏTİCƏYƏ BAX →':'NÖVBƏTİ SUAL →';$('nextBtn').classList.remove('hidden');}
-  else if(q.type==='multi')$('checkBtn').classList.toggle('hidden',selected.length===0);
 }
 function toggleChoice(i,button){
   if(locked)return;
   if(selected.includes(i)){selected=selected.filter(x=>x!==i);button.classList.remove('selected');}
   else{selected.push(i);button.classList.add('selected');}
-  activeQuestions[index]._selected=[...selected]; activeQuestions[index]._answered=false;
-  $('feedback').className='hidden'; $('nextBtn').classList.add('hidden');
   $('checkBtn').classList.toggle('hidden',selected.length===0);
 }
-function choose(values){if(locked)return;selected=values;activeQuestions[index]._selected=[...selected];activeQuestions[index]._answered=false;evaluateAnswer();}
-function checkMulti(){if(!locked&&selected.length){activeQuestions[index]._selected=[...selected];evaluateAnswer();}}
-function showFeedback(q,values){
-  const isCorrect=values.length===q.c.length&&q.c.every(x=>values.includes(x));
+function choose(values){if(locked)return;selected=values;evaluateAnswer();}
+function checkMulti(){if(!locked&&selected.length)evaluateAnswer();}
+function evaluateAnswer(){
+  locked=true; const q=activeQuestions[index];
+  const isCorrect=selected.length===q.c.length&&q.c.every(x=>selected.includes(x));
+  if(isCorrect)correct++;else wrong++;
+  [...$('answers').children].forEach((b,i)=>{b.disabled=true;if(q.c.includes(i))b.classList.add('correct');if(selected.includes(i)&&!q.c.includes(i))b.classList.add('wrong');});
   const fb=$('feedback');
   if(q.type==='multi'){
     let html=isCorrect?'✓ Bütün düzgün cavabları seçdin!':'✕ Cavab tam düzgün deyil. Düzgün cavabların izahı:';
     q.a.forEach((answer,i)=>{html+=`<p><b>${String.fromCharCode(65+i)}. ${answer}</b> — ${q.e[i]}</p>`;}); fb.innerHTML=html;
   }else{
-    const chosen=values[0];
-    fb.textContent=isCorrect?'✓ Düzgün cavab! '+q.e[chosen]:'✕ Səhv cavab. Düzgün cavab: '+q.c.map(i=>q.a[i]).join(', ')+'. '+(q.e[chosen]||'');
+    const chosen=selected[0];
+    fb.textContent=isCorrect?'✓ Düzgün cavab! '+q.e[chosen]:'✕ Səhv cavab. Düzgün cavab: '+q.c.map(i=>q.a[i]).join(', ')+'. '+q.e[chosen];
   }
   fb.className=isCorrect?'feedback':'feedback bad';
-}
-function evaluateAnswer(){
-  const q=activeQuestions[index]; q._answered=true; locked=true;
-  [...$('answers').children].forEach((b,i)=>{b.disabled=true;if(q.c.includes(i))b.classList.add('correct');if(selected.includes(i)&&!q.c.includes(i))b.classList.add('wrong');});
-  showFeedback(q,selected); $('checkBtn').classList.add('hidden');
-  $('nextBtn').textContent=index===activeQuestions.length-1?'NƏTİCƏYƏ BAX →':'NÖVBƏTİ SUAL →'; $('nextBtn').classList.remove('hidden');
-}
-function previousQuestion(){
-  if(index<=0)return;
-  activeQuestions[index]._selected=[...selected]; index--; render();
-}
-function nextQuestion(){
-  activeQuestions[index]._selected=[...selected];
-  if(!activeQuestions[index]._answered){$('quizListStatus').textContent='';return;}
-  if(index<activeQuestions.length-1){index++;render();}else finish();
+  $('checkBtn').classList.add('hidden');
+  $('nextBtn').textContent=index===activeQuestions.length-1?'NƏTİCƏYƏ BAX →':'NÖVBƏTİ SUAL →';
+  $('nextBtn').classList.remove('hidden');
 }
 async function finish(){
-  correct=activeQuestions.filter(q=>q._answered && q._selected.length===q.c.length && q.c.every(x=>q._selected.includes(x))).length; wrong=activeQuestions.filter(q=>q._answered && !(q._selected.length===q.c.length && q.c.every(x=>q._selected.includes(x)))).length;
   show('result'); const score=Math.round(correct/activeQuestions.length*100);
   $('score').textContent=score; $('correct').textContent=correct; $('wrong').textContent=wrong;
   $('ring').style.setProperty('--score',score+'%');
@@ -503,17 +472,20 @@ async function finish(){
   $('resultTitle').textContent=title; $('resultText').textContent=`${activeQuestions.length} sualı tamamladın. Nəticən: ${score} bal.`;
   $('message').textContent=msg;
   lastResult={quiz_id:activeQuiz.id,participant_name:participantName,score,correct_answers:correct,wrong_answers:wrong,total_questions:activeQuestions.length,answers:activeQuestions.map(q=>({question:q.q,selected_answers:selectedLabels(q),correct_answer:q.c.map(i=>q.a[i]).join(', ')}))};
+  // Tamamlanma statusu cihazda saxlanılır; hər yeni cəhd Supabase-də ayrıca nəticə olur.
+  try{markQuizCompleted(activeQuiz.id);}catch(e){}
   $('saveStatus').textContent='Nəticə yadda saxlanılır...';
   const {error}=await db.from('quiz_results').insert(lastResult);
-  $('saveStatus').textContent=error?'Nəticə bazaya yazılmadı: '+error.message:'✓ Nəticən uğurla yadda saxlanıldı.';
+  $('saveStatus').textContent=error?'Nəticə bazaya yazılmadı: '+error.message:'✓ Nəticən uğurla yadda saxlanıldı. Bu Quiz sənin üçün tamamlanmış kimi işarələndi.';
 }
 function selectedLabels(q){return q._selected?q._selected.map(i=>q.a[i]):[];}
 $('startBtn').addEventListener('click',begin);
 $('checkBtn').addEventListener('click',checkMulti);
-$('nextBtn').addEventListener('click',nextQuestion);
-$('prevBtn').addEventListener('click',previousQuestion);
-$('exitQuizBtn').addEventListener('click',()=>{if(confirm('Quizdən çıxıb siyahıya qayıtmaq istəyirsən?'))show('quizList');});
-$('restartBtn').addEventListener('click',()=>{$('participant').value=participantName;show('start');});
+$('nextBtn').addEventListener('click',()=>{
+  activeQuestions[index]._selected=[...selected];
+  if(index<activeQuestions.length-1){index++;render();}else finish();
+});
+$('restartBtn').addEventListener('click',async()=>{$('participant').value=participantName;show('quizList');await loadPublicQuizzes();});
 $('adminOpen').addEventListener('click',()=>show('admin'));
 $('backBtn').addEventListener('click',()=>show('start'));
 $('quizListBack').addEventListener('click',()=>show('start'));
@@ -521,7 +493,7 @@ $('loginBtn').addEventListener('click',async()=>{
   if(!db){$('adminStatus').textContent='Supabase bağlantısı yoxdur.';return;}
   const {error}=await db.auth.signInWithPassword({email:$('adminEmail').value.trim(),password:$('adminPassword').value});
   if(error){$('adminStatus').textContent='Giriş alınmadı: '+error.message;return;}
-  $('adminLogin').classList.add('hidden'); $('adminData').classList.remove('hidden'); loadResults(); loadAdminQuizzes();
+  $('adminLogin').classList.add('hidden'); $('adminData').classList.remove('hidden'); loadResults();
 });
 $('createQuizBtn').addEventListener('click',async()=>{
   const title=$('newQuizTitle').value.trim(), description=$('newQuizDescription').value.trim();
@@ -534,19 +506,8 @@ $('createQuizBtn').addEventListener('click',async()=>{
   if(error){$('createQuizStatus').textContent='Yadda saxlanmadı: '+error.message;return;}
   $('createQuizStatus').textContent='✓ Quiz yaradıldı. Köhnə Quiz-lər saxlanılıb.';
   $('newQuizTitle').value='';$('newQuizDescription').value='';$('newQuizQuestions').value='';
-  loadResults(); loadAdminQuizzes();
+  loadResults();
 });
-async function loadAdminQuizzes(){
-  if(!db)return; const box=$('adminQuizList'); box.innerHTML='Yüklənir...';
-  const {data,error}=await db.from('quizzes').select('id,title,description,questions,is_active,created_at').order('created_at',{ascending:true});
-  if(error){box.textContent='Quiz-lər yüklənmədi: '+error.message;return;}
-  box.innerHTML=''; if(!data?.length){box.textContent='Hələ quiz yoxdur.';return;}
-  data.forEach(qz=>{const row=document.createElement('div');row.className='quiz-admin-item';const meta=document.createElement('div');meta.className='qmeta';const strong=document.createElement('strong');strong.textContent=qz.title;const small=document.createElement('small');small.textContent=(qz.description||'')+' • '+(qz.questions?.length||0)+' sual • '+(qz.is_active?'Aktiv':'Arxivdə');meta.append(strong,small);const edit=document.createElement('button');edit.className='secondary';edit.textContent='Redaktə et';edit.addEventListener('click',()=>openQuizEditor(qz));const archive=document.createElement('button');archive.className='danger';archive.textContent=qz.is_active?'Arxivlə':'Aktiv et';archive.addEventListener('click',()=>toggleQuizActive(qz));row.append(meta,edit,archive);box.append(row);});
-}
-function openQuizEditor(qz){$('editQuizId').value=qz.id;$('editQuizTitle').value=qz.title||'';$('editQuizDescription').value=qz.description||'';$('editQuizQuestions').value=JSON.stringify(qz.questions||[],null,2);$('editQuizStatus').textContent='';$('editQuizBox').classList.remove('hidden');$('editQuizBox').scrollIntoView({behavior:'smooth',block:'start'});}
-$('cancelEditBtn').addEventListener('click',()=>{$('editQuizBox').classList.add('hidden');});
-$('saveEditBtn').addEventListener('click',async()=>{const id=$('editQuizId').value,title=$('editQuizTitle').value.trim(),description=$('editQuizDescription').value.trim();let qs;try{if(!title)throw new Error('Quiz-in adını yaz.');qs=JSON.parse($('editQuizQuestions').value);if(!Array.isArray(qs)||!qs.length)throw new Error('Ən azı bir sual daxil et.');qs=qs.map(normalizeQuestion);}catch(err){$('editQuizStatus').textContent='Xəta: '+err.message;return;} $('editQuizStatus').textContent='Yadda saxlanılır...';const {error}=await db.from('quizzes').update({title,description,questions:qs}).eq('id',id);if(error){$('editQuizStatus').textContent='Saxlanmadı: '+error.message;return;} $('editQuizStatus').textContent='✓ Dəyişikliklər saxlanıldı.';await loadAdminQuizzes();});
-async function toggleQuizActive(qz){const next=!qz.is_active;const msg=next?'Bu quiz yenidən aktiv edilsin?':'Bu quiz arxivlənsin? İştirakçılara görünməyəcək, amma nəticələr saxlanacaq.';if(!confirm(msg))return;const {error}=await db.from('quizzes').update({is_active:next}).eq('id',qz.id);if(error){$('adminStatus').textContent='Əməliyyat alınmadı: '+error.message;return;}loadAdminQuizzes();}
 async function loadResults(){
   if(!db)return; $('adminStatus').textContent='Nəticələr yüklənir...';
   const {data,error}=await db.from('quiz_results').select('id,quiz_id,participant_name,score,correct_answers,wrong_answers,created_at,quizzes(title)').order('created_at',{ascending:false}).limit(500);
@@ -559,7 +520,7 @@ async function loadResults(){
   });
   $('adminStatus').textContent=`Cəmi ${adminRows.length} nəticə göstərilir.`;
 }
-$('refreshBtn').addEventListener('click',()=>{loadResults();loadAdminQuizzes();});
+$('refreshBtn').addEventListener('click',loadResults);
 $('logoutBtn').addEventListener('click',async()=>{await db?.auth.signOut();$('adminData').classList.add('hidden');$('adminLogin').classList.remove('hidden');$('adminStatus').textContent='Sessiyadan çıxıldı.';});
 $('csvBtn').addEventListener('click',()=>{
   const rows=adminRows; const csv=['Quiz,Ad,Bal,Duzgun,Səhv,Tarix',...rows.map(r=>[r.quizzes?.title||'Köhnə Quiz',r.participant_name,r.score,r.correct_answers,r.wrong_answers,r.created_at].map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(','))].join('\n');
