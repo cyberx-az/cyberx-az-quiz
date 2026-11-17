@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -43,12 +44,7 @@ body.light {
   --shadow:rgba(15,23,42,.08);
 }
 
-* {
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
+* { box-sizing:border-box; margin:0; padding:0; }
 html { scroll-behavior:smooth; }
 
 body {
@@ -60,17 +56,9 @@ body {
   transition:background .25s,color .25s;
 }
 
-a {
-  color:inherit;
-  text-decoration:none;
-}
-
+a { color:inherit; text-decoration:none; }
 button { font:inherit; }
-
-.container {
-  width:min(1160px,92%);
-  margin:auto;
-}
+.container { width:min(1160px,92%); margin:auto; }
 
 .navbar {
   position:sticky;
@@ -200,7 +188,6 @@ button { font:inherit; }
 }
 
 /* HERO */
-
 .hero {
   padding:100px 0 85px;
   background:
@@ -327,7 +314,6 @@ button { font:inherit; }
 }
 
 /* GENERAL */
-
 section { padding:80px 0; }
 
 .section-heading {
@@ -357,11 +343,7 @@ section { padding:80px 0; }
 }
 
 /* CATEGORIES */
-
-.categories,
-.materials {
-  background:var(--section);
-}
+.categories,.materials { background:var(--section); }
 
 .category-grid {
   display:grid;
@@ -395,16 +377,8 @@ section { padding:80px 0; }
   font-size:22px;
 }
 
-.category-card h3 {
-  margin-bottom:7px;
-  font-size:14px;
-}
-
-.category-card p {
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.7;
-}
+.category-card h3 { margin-bottom:7px; font-size:14px; }
+.category-card p { color:var(--muted); font-size:12px; line-height:1.7; }
 
 .category-arrow {
   position:absolute;
@@ -414,7 +388,6 @@ section { padding:80px 0; }
 }
 
 /* LESSONS */
-
 .lesson-grid {
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -456,10 +429,7 @@ body.light .lesson-visual {
   font-weight:800;
 }
 
-.lesson-content h3 {
-  margin-bottom:9px;
-  font-size:16px;
-}
+.lesson-content h3 { margin-bottom:9px; font-size:16px; }
 
 .lesson-content p {
   min-height:44px;
@@ -480,7 +450,6 @@ body.light .lesson-visual {
 .lesson-bottom span:last-child { color:var(--blue); }
 
 /* MATERIALS */
-
 .material-grid {
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -508,18 +477,10 @@ body.light .lesson-visual {
   font-size:22px;
 }
 
-.material-card h3 {
-  margin-bottom:6px;
-  font-size:14px;
-}
-
-.material-card p {
-  color:var(--muted);
-  font-size:12px;
-}
+.material-card h3 { margin-bottom:6px; font-size:14px; }
+.material-card p { color:var(--muted); font-size:12px; }
 
 /* VIRTUAL LAB */
-
 .lab-box {
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -550,15 +511,8 @@ body.light .lesson-visual {
   margin:22px 0;
 }
 
-.lab-feature {
-  color:var(--muted);
-  font-size:12px;
-}
-
-.lab-feature span {
-  margin-right:6px;
-  color:#16a34a;
-}
+.lab-feature { color:var(--muted); font-size:12px; }
+.lab-feature span { margin-right:6px; color:#16a34a; }
 
 .network-visual {
   min-height:270px;
@@ -590,7 +544,6 @@ body.light .lesson-visual {
 }
 
 /* QUIZ */
-
 .quiz-box {
   padding:48px 25px;
   border:1px solid rgba(129,140,248,.22);
@@ -616,7 +569,6 @@ body.light .lesson-visual {
 .quiz-box .btn { margin-top:25px; }
 
 /* CAREER */
-
 .career-grid {
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -630,23 +582,11 @@ body.light .lesson-visual {
   background:var(--card);
 }
 
-.career-icon {
-  margin-bottom:13px;
-  font-size:27px;
-}
-
-.career-card h3 {
-  margin-bottom:8px;
-  font-size:15px;
-}
-
-.career-card p {
-  color:var(--muted);
-  font-size:12px;
-}
+.career-icon { margin-bottom:13px; font-size:27px; }
+.career-card h3 { margin-bottom:8px; font-size:15px; }
+.career-card p { color:var(--muted); font-size:12px; }
 
 /* CTA */
-
 .final-cta {
   padding:60px 25px;
   border:1px solid rgba(56,189,248,.2);
@@ -667,7 +607,6 @@ body.light .lesson-visual {
 }
 
 /* FOOTER */
-
 footer {
   margin-top:75px;
   padding:45px 0 22px;
@@ -692,10 +631,7 @@ footer {
   line-height:1.8;
 }
 
-.footer-links h4 {
-  margin-bottom:13px;
-  font-size:13px;
-}
+.footer-links h4 { margin-bottom:13px; font-size:13px; }
 
 .footer-links a {
   display:block;
@@ -717,7 +653,6 @@ footer {
 }
 
 /* RESPONSIVE */
-
 @media(max-width:950px) {
   .nav-links { gap:12px; }
   .nav-links a { font-size:11px; }
@@ -756,9 +691,7 @@ footer {
   .hero h1 { letter-spacing:-2px; }
   section { padding:60px 0; }
 
-  .lesson-grid,
-  .material-grid,
-  .career-grid { grid-template-columns:1fr; }
+  .lesson-grid,.material-grid,.career-grid { grid-template-columns:1fr; }
 
   .lab-box {
     grid-template-columns:1fr;
@@ -809,7 +742,8 @@ footer {
 
     <div class="nav-actions">
       <button class="theme-toggle" id="themeToggle" aria-label="Gecə və gündüz rejimini dəyiş" title="Gecə / Gündüz">☀️</button>
-      <a href="#quiz" class="btn btn-primary">Quiz-lər</a>
+      <a href="./index.html" class="btn btn-outline">Daxil ol</a>
+      <a href="https://cyberx-az.github.io/cyberx-az-quiz/home.html" class="btn btn-primary">Quiz-lər</a>
     </div>
 
   </div>
@@ -872,7 +806,6 @@ footer {
 
 <section class="categories" id="istiqametler">
   <div class="container">
-
     <div class="section-heading">
       <div class="section-label">Tədris istiqamətləri</div>
       <h2>IT dünyasını <span class="gradient-text">kəşf et</span></h2>
@@ -880,7 +813,6 @@ footer {
     </div>
 
     <div class="category-grid">
-
       <a href="#dersler" class="category-card">
         <div class="category-icon">🖥️</div>
         <h3>Help Desk</h3>
@@ -936,14 +868,12 @@ footer {
         <p>IT karyerası, CV, müsahibə hazırlığı və peşəkar inkişaf.</p>
         <span class="category-arrow">↗</span>
       </a>
-
     </div>
   </div>
 </section>
 
 <section id="dersler">
   <div class="container">
-
     <div class="section-heading">
       <div class="section-label">Bilik bazası</div>
       <h2>Öyrənməyə <span class="gradient-text">buradan başla</span></h2>
@@ -951,7 +881,6 @@ footer {
     </div>
 
     <div class="lesson-grid">
-
       <article class="lesson-card">
         <div class="lesson-visual">🌐</div>
         <div class="lesson-content">
@@ -990,14 +919,12 @@ footer {
           </div>
         </div>
       </article>
-
     </div>
   </div>
 </section>
 
 <section class="materials" id="materiallar">
   <div class="container">
-
     <div class="section-heading">
       <div class="section-label">Resurs mərkəzi</div>
       <h2>IT bilikləri üçün <span class="gradient-text">əlavə resurslar</span></h2>
@@ -1005,7 +932,6 @@ footer {
     </div>
 
     <div class="material-grid">
-
       <div class="material-card">
         <div class="material-icon">📚</div>
         <div><h3>PDF dərsliklər</h3><p>IT mövzuları üzrə elektron kitablar və dərs materialları.</p></div>
@@ -1035,14 +961,12 @@ footer {
         <div class="material-icon">📝</div>
         <div><h3>Praktiki tapşırıqlar</h3><p>Öyrəndiklərini yoxlamaq üçün nümunələr və çalışmalar.</p></div>
       </div>
-
     </div>
   </div>
 </section>
 
 <section id="virtual-lab">
   <div class="container">
-
     <div class="lab-box">
       <div>
         <div class="section-label">Praktiki təcrübə</div>
@@ -1071,7 +995,6 @@ footer {
         <div class="network-device">🌐</div>
       </div>
     </div>
-
   </div>
 </section>
 
@@ -1085,14 +1008,13 @@ footer {
         Müxtəlif IT mövzuları üzrə testlərdə iştirak et,
         nəticələrini gör və biliklərini daim inkişaf etdir.
       </p>
-      <a href="./index.html" class="btn btn-primary">QUIZ-LƏRƏ KEÇ →</a>
+      <a href="https://cyberx-az.github.io/cyberx-az-quiz/home.html" class="btn btn-primary">QUIZ-LƏRƏ KEÇ →</a>
     </div>
   </div>
 </section>
 
 <section id="karyera">
   <div class="container">
-
     <div class="section-heading">
       <div class="section-label">Peşəkar inkişaf</div>
       <h2>IT karyerana <span class="gradient-text">istiqamət ver</span></h2>
@@ -1100,7 +1022,6 @@ footer {
     </div>
 
     <div class="career-grid">
-
       <div class="career-card">
         <div class="career-icon">🎯</div>
         <h3>Haradan başlamalı?</h3>
@@ -1118,7 +1039,6 @@ footer {
         <h3>Karyera inkişafı</h3>
         <p>Help Desk-dən Network Administrator və Cybersecurity sahələrinə inkişaf.</p>
       </div>
-
     </div>
   </div>
 </section>
@@ -1128,7 +1048,7 @@ footer {
     <div class="final-cta">
       <h2>IT dünyasında öz yerini <span class="gradient-text">yarat.</span></h2>
       <p>Bu gün öyrənməyə başla. Sabah daha güclü mütəxəssis ol.</p>
-      <a href="./index.html" class="btn btn-primary">Quiz-lərə keç →</a>
+      <a href="./index.html" class="btn btn-primary">Platformaya daxil ol →</a>
     </div>
   </div>
 </section>
@@ -1137,9 +1057,7 @@ footer {
 
 <footer>
   <div class="container">
-
     <div class="footer-top">
-
       <div class="footer-about">
         <a href="#ana" class="logo">
           <div class="logo-icon">⌘</div>
@@ -1161,23 +1079,21 @@ footer {
 
       <div class="footer-links">
         <h4>İmkanlar</h4>
-        <a href="#quiz">Quiz mərkəzi</a>
+        <a href="https://cyberx-az.github.io/cyberx-az-quiz/home.html">Quiz mərkəzi</a>
         <a href="#karyera">IT Karyera</a>
+        <a href="./index.html">Daxil ol</a>
       </div>
-
     </div>
 
     <div class="footer-bottom">
       <span>© <span id="year"></span> CyberX AZ. Bütün hüquqlar qorunur.</span>
       <span>Learn • Practice • Grow</span>
     </div>
-
   </div>
 </footer>
 
 <script>
 /* MOBIL MENYU */
-
 const menuToggle = document.getElementById("menuToggle");
 const navLinks = document.getElementById("navLinks");
 
@@ -1194,12 +1110,10 @@ document.querySelectorAll(".nav-links a").forEach(link => {
 });
 
 /* GECƏ / GÜNDÜZ REJİMİ */
-
 const themeToggle = document.getElementById("themeToggle");
 
 function setTheme(theme) {
   document.body.classList.toggle("light", theme === "light");
-
   themeToggle.textContent = theme === "light" ? "🌙" : "☀️";
 
   themeToggle.title = theme === "light"
@@ -1228,7 +1142,6 @@ themeToggle.addEventListener("click", () => {
 });
 
 /* DIGER FUNKSIYALAR */
-
 document.getElementById("year").textContent = new Date().getFullYear();
 
 document.querySelectorAll("[data-soon]").forEach(button => {
@@ -1240,4 +1153,3 @@ document.querySelectorAll("[data-soon]").forEach(button => {
 
 </body>
 </html>
-```
